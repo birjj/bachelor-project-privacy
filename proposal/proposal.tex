@@ -1,0 +1,72 @@
+\documentclass[a4paper]{article}
+
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{mathabx}
+\usepackage{mathrsfs}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage[autostyle]{csquotes}
+\usepackage[backend=biber,style=alphabetic]{biblatex}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{subfig}
+\addbibresource{proposal.bib}
+
+% format subsections
+\titleformat{\subsection}[block]{\hspace{1em}}{\bfseries\thesubsection}{1em}{\bfseries}
+% support vertical lines in matrices
+\makeatletter
+\renewcommand*\env@matrix[1][*\c@MaxMatrixCols c]{%
+  \hskip -\arraycolsep
+  \let\@ifnextchar\new@ifnextchar
+  \array{#1}}
+\makeatother
+% angled fractions
+\newcommand*\rfrac[2]{{}^{#1}\!/_{#2}}
+% text below matrices
+\newcommand*{\putunder}[2]{%
+  {\mathop{#1}_{\mathstrut #2}}%
+}
+% multiline comment
+\newcommand{\comment}[1]{}
+% vertical bars
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+\title{\vspace{-2cm}Bachelor Project on Local Differential Privacy}
+
+\author{Johan Ringmann Fagerberg (jofag17) - 1996-09-24}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{description}[style=nextline]
+    \item[Motivation] Differential privacy is a recently proposed measure of the level of privacy provided by random functions. It provides a formal measure for how much information a potential attacker can achieve from a perturbed data set, when the data perturbation consists of random noise.
+    
+    In global differential privacy, a global aggregator has access to the real data prior to perturbing it. This differs from local differential privacy, where users perturb their data before sending it to the aggregator.
+    
+    I aim to gain an understanding of differential privacy in general, with a particular focus on local differential privacy, and attempt to use that to produce an architecture for a trust-less and privacy-respecting web analytics solution.
+    
+    \item[Product] Description of a web analytics system, à la \cite{webanalytics_2012}, but using local differential privacy (or potentially \href{https://desfontain.es/privacy/local-global-differential-privacy.html#the-best-of-both-worlds}{ESA}, depending on whether that'd be relevant - requires better understanding) to remove the need for users to trust a potentially malicious third party. Report should include an evaluation of the pros and cons of this implementation vs. 
+    
+    \item[Experiments] Current proposal mostly involves analyzing a theoretical solution. It would definitely be important to analyze real world applications, i.e. how much the added noise from differential privacy would impact usability of the analytics, but actual experiments would require an implementation which I am unlikely to achieve in 10 ECTS.
+    
+    \item[Risks] Potentially not possible to generate an actually useful trust-less web analytics solution (e.g. due to increased noise from local differential privacy). Could still produce report and evaluate why it doesn't work.
+    
+    \item[Research entry points] \hfill
+    \vspace{-1em}
+    \begin{description}
+        \item[\cite{desfontain_overview}] Reading list of key papers in differential privacy. Part of a semi-technical blog series on differential privacy. Probably the most useful entry point.
+        \item[\cite{localdiffpriv_survey}] Recent survey on local different privacy methods for various use cases. Primarily useful as a source of articles through its citations.
+    \end{description}
+\end{description}
+
+\printbibliography
+
+\end{document}
