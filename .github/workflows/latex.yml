@@ -9,10 +9,9 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v2
       - name: Run compiler
-        uses: xu-cheng/latex-action@v2
+        uses: vinay0410/tectonic-action@master
         with:
-          root_file: |
-            proposal/proposal.tex
+          tex_path: "proposal/proposal.tex"
       - name: Upload PDF
         uses: actions/upload-artifact@v2
         if: ${{ success() }}
