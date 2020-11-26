@@ -14,8 +14,10 @@ jobs:
           files: |
             proposal/proposal.tex
       - name: Upload PDF
-        uses: actions/upload-artifact@v2
         if: ${{ success() }}
-        with:
-          path: |
-            proposal/proposal.pdf
+        run: |
+          git config --local user.name "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add **/*.pdf
+          git commit -m "Add compiled PDFs"
+          git push
