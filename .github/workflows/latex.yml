@@ -8,12 +8,14 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
-      - name: Run compiler
-        uses: vinay0410/tectonic-action@master
+      - name: Compile LaTeX files
+        uses: birjolaxew/tectonic-biber-action@master
         with:
-          tex_path: "proposal/proposal.tex"
+          files: |
+            proposal/proposal.tex
       - name: Upload PDF
         uses: actions/upload-artifact@v2
         if: ${{ success() }}
         with:
-          path: proposal/proposal.pdf
+          path: |
+            proposal/proposal.pdf
