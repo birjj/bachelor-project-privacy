@@ -65,15 +65,20 @@ list of key papers in differential privacy presented as a semi-technical blog
 series on differential privacy. Moreover, we will also read 
 \cite{localdiffpriv_survey}, i.e., a recent survey on local differential privacy 
 methods for various use cases.
-\item
-Development of a prototype (tentatively March-April). A web analytics 
-system à la \cite{webanalytics_2012} will be considered for developing a 
-prototype that uses local differential privacy
-% (or potentially \href{
-% https://desfontain.es/privacy/local-global-differential-privacy.html#the-best-of
-% -both-worlds}{ESA}
-to remove the need for users to trust a potentially malicious 
-third party. The prototype will be tested to evaluate computational overhead on both client and server, as well as bandwidth overhead in terms of communicating the perturbed data from client to server.
+     \item Development and analysis of our novel locally differentially private 
+     analytics solution (tentatively March-April). A web analytics system à la 
+     \cite{webanalytics_2012}
+     % (or potentially \href{
+     % https://desfontain.es/privacy/local-global-differential-privacy.html#the-best-of
+     % -both-worlds}{ESA}
+     will be developed that uses local differential privacy to provide privacy 
+     guarantees for users. The analysis of our system will primarily focus on 
+     the strength of the privacy guarantee provided by our system, as well as 
+     its impact on queries that are classically of interest in web analytics.
+     \item Development of a prototype (tentatively end of March). A prototype
+     of our system will be implemented. The prototype will be tested to evaluate 
+     computational overhead on both client and server, as well as bandwidth 
+     overhead in terms of communicating the perturbed data from client to server.
 \item
 Report writing (tentatively April-May). The final report will be written 
 following the academic conventions.
