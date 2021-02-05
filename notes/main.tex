@@ -23,8 +23,6 @@
 \definecolor{codebackground}{RGB}{240, 240, 235}
 \setminted{bgcolor=codebackground}
 
-% format subsections
-\titleformat{\subsection}[block]{\hspace{1em}}{\bfseries\thesubsection}{1em}{\bfseries}
 % support vertical lines in matrices
 \makeatletter
 \renewcommand*\env@matrix[1][*\c@MaxMatrixCols c]{%
@@ -135,5 +133,67 @@ Differentially private algorithms for different kinds of analyses have been publ
     
     Unfortunately, sampling is usually not uniformly random. This can be counterbalanced by being conservative with the population estimate. Keeping samples confidential also sometimes requires extra care (e.g. going to their house for interviews means neighbors may now know) - and also requires that who has \textit{not} been sampled is kept confidential.
 \end{description}
+
+\section{"Privacy book" (chapter 1-3) \hfill \href{https://www.cis.upenn.edu/~aaroth/Papers/privacybook.pdf}{(PDF)}}
+
+\subsection{Chapter 1. The promise of differential privacy}
+
+Differential privacy is a definition of privacy tailored to the problem of privacy-preserving data analysis, tackling the paradox of learning something about a population while revealing nothing about an individual (\textit{nearly} nothing, to avoid the whole paradox thing).
+
+It protects against linkage attacks (e.g. anonymized Netflix dataset where individuals were identified by cross-referencing with IMDb), amongst other things.
+
+\subsection{Chapter 2. Basic terms}
+
+Unlike e.g. encryption, it isn't reasonable to require that an adversary can learn nothing; the intended recipient and the adversary is one and the same, so if the adversary can learn nothing then the dataset is useless. \bigskip
+
+For the formal definition we define $\mathbb{N}^{|\mathcal{X}|}$ as the histogram of our database (an entry for each possible type in our universe $\mathcal{X}$, with the entry's value being the number of entries of that type that exists in our database), and the $\ell_1$ norm as $||x-y||_1 = \sum_{i=1}^{|\mathcal{X}|} |x_i - y_i|$. We can then define "differential privacy" as:
+
+\begin{mdframed}
+    A randomized algorithm $\mathcal{M}$ with domain $\mathbb{N}^{|\mathcal{X}|}$ is $(\epsilon, \delta)$-differentially private if for all $\mathcal{S} \subseteq \text{Range}(\mathcal{M})$ and for all $x,y \in \mathbb{N}^{|\mathcal{X}|}$ such that $||x-y||_1 \leq 1$:
+    
+    $$\Pr(\mathcal{M}(x) \in \mathcal{S}) \leq \exp(\epsilon) \Pr(\mathcal{M}(y) \in \mathcal{S}) + \delta,$$
+    
+    where the probability space is over the coin flips of the mechanism $\mathcal{M}$. If $\delta=0$, we say that $\mathcal{M}$ is $\epsilon$-differentially private.
+\end{mdframed}
+
+That is, for any two possible databases $x,y$, which differ in at most one entry, the probability for the output $\mathcal{M}(x)$ is no larger than the given linear function of the probability for the output $\mathcal{M}(y)$. Since $x,y$ are interchangeable, this essentially guarantees that we cannot tell whether a given entry was in the database or not with better than a bounded certainty, if we're only given the output of the algorithm. \bigskip
+
+We also introduce the measure of \textit{privacy loss} incurred by observing some output $\xi$, defined as
+
+$$\mathcal{L}_{\mathcal{M}(x)||\mathcal{M}(y)}^{(\xi)} = \ln \left( \frac{\Pr(\mathcal{M}(x) = \xi)}{\Pr(\mathcal{M}(y) = \xi)} \right).$$
+
+This can be positive (when it's more likely to observe $\xi$ under $x$ than $y$) or negative (the inverse). It can be shown (lemma 3.17 in the book) that for any adjacent databases the absolute value of this privacy loss can be bounded by $\epsilon$ with probability at least $1-\delta$.
+
+\bigskip
+
+Differential privacy is safe from postprocessing. That is, the composition of any function with a $(\epsilon,\delta)$-differentially private mechanism is itself $(\epsilon,\delta)$-differentially private.
+
+Differentially private algorithms can composition nicely. The composition of $k$ $(\epsilon_i, \delta_i)$-differentially private mechanisms results in a $(\sum_i \epsilon_i, \sum_i \delta_i)$-differentially private mechanism. More on that in chapter 3.
+
+$\epsilon$-differentially private mechanisms also generalize nicely for databases that differ in more than one entry. For databases that differ in $k$ entries (a "group size" of $k$), we get a $(k\epsilon)$-differentially private mechanism.
+
+For $(\epsilon, \delta)$-differentially private mechanisms this is much worse, resulting in a $(k\epsilon, k\delta\cdot\exp[(k-1)\epsilon])$-differentially private mechanism. 
+
+\bigskip
+
+To recapitulate, differential privacy has several qualitative properties:
+
+\begin{description}
+    \item[Protection against arbitrary risk] It protects against any risk involved with participating in a dataset. This goes beyond e.g. protection against re-identification.
+    
+    \item[Automatic neutralization of linkage attacks] Including those against datasets that do not yet exist.
+    
+    \item[Quantification of privacy loss] It is not a binary concept, and we have a way to measure how much privacy loss. This makes it possible to compare different techniques.
+    
+    \item[Composition] We analyze cumulative privacy losses over multiple computations. This enables complex differentially private algorithms to be designed from simpler differentially private building blocks.
+    
+    \item[Group privacy] We can analyze privacy loss incurred by groups, e.g. families in health studies.
+    
+    \item[Closure under post-processing] No post-processing of the output of a differentially private algorithm is ever able to harm the privacy provide, regardless of the auxiliary information available.
+\end{description}
+
+\subsection{Chapter 3. Basic techniques and composition theorems}
+
+\textcolor{red}{TODO}
 
 \end{document}
