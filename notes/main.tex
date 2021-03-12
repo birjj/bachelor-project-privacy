@@ -4,6 +4,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{dsfont}
 \usepackage{mathtools}
 \usepackage{mathabx}
 \usepackage{mathrsfs}
@@ -192,8 +193,58 @@ To recapitulate, differential privacy has several qualitative properties:
     \item[Closure under post-processing] No post-processing of the output of a differentially private algorithm is ever able to harm the privacy provide, regardless of the auxiliary information available.
 \end{description}
 
+\newpage
 \subsection{Chapter 3. Basic techniques and composition theorems}
 
-\textcolor{red}{TODO}
+A few useful probabilistic tools, stated in their easiest-to-use form (not their strongest form):
+
+\begin{mdframed}
+    \textbf{Additive Chernoff Bound:} Let $X_1, \dots, X_m$ be independent random variables such that $0 \leq X_i \leq 1$ for all $i$. Let $S = \frac{1}{m} \sum_{i=1}^m X_i$ denote their mean, and let $\mu = \mathds{E}[S]$ denote their expected mean. Then
+    $$\Pr[S > \mu + \epsilon] \leq \exp(-2m\epsilon^2)$$
+    $$\Pr[S < \mu - \epsilon] \leq \exp(-2m\epsilon^2)$$
+\end{mdframed}
+
+\begin{mdframed}
+    \textbf{Multiplicative Chernoff Bound:} Let $X_1, \dots, X_m$ be independent random variables such that $0 \leq X_i \leq 1$ for all $i$. Let $S = \frac{1}{m} \sum_{i=1}^m X_i$ denote their mean, and let $\mu = \mathds{E}[S]$ denote their expected mean. Then
+    $$\Pr[S > (1 + \epsilon) \mu] \leq \exp(-m\mu\epsilon^2 / 3)$$
+    $$\Pr[S < (1 - \epsilon) \mu] \leq \exp(-m\mu\epsilon^2 / 2)$$
+\end{mdframed}
+
+\begin{mdframed}
+    \textbf{Azuma's Inequality:} Useful when we do not have independent random variables. Let $f$ be a function of $m$ random variables $X_1, \dots, X_m$, each $X_i$ taking values from a set $A_i$ such that $\mathds{E}[f]$ is bounded. Let $c_i$ denote the maximum effect of $X_i$ on $f$ -- i.e. for all $a_i, a'_i \in A_i$:
+    $$\left| \mathds{E}[f | X_1, \dots, X_{i-1}, X_i = a_i ] \right| - \left| \mathds{E}[f | X_1, \dots, X_{i-1}, X_i = a'_i ] \right| \leq c_i$$
+    
+    Then
+    $$\Pr[f(X_1, \dots, X_m) \geq \mathds{E}[f] + t] \leq \exp \left( \frac{-2t^2}{\sum_{i=1}^m c_i^2} \right)$$
+\end{mdframed}
+
+\begin{mdframed}
+    \textbf{Stirling's Approximation:} $n!$ can be approximated by $\sqrt{2n\pi}(n/e)^n$:
+    $$\sqrt{2n\pi}(n/e)^n e^{1/(12n+1)} < n! < \sqrt{2n\pi}(n/e)^n e^{1/(12n)}$$
+\end{mdframed}
+
+\subsection{Laplace mechanism}
+
+Numeric queries $f : \mathbb{N}^{|\mathcal{X}|} \to \mathbb{R}^k$ are often used and fundamental to data science. One of the important parameters that determine how accurately we can give a private answer for such queries depends on their $\ell_1$ sensitivity
+
+\begin{mdframed}
+    \textbf{The $\ell_1$ sensitivity} of a function $f : \mathbb{N}^{|\mathcal{X}|} \to \mathbb{R}^k$ is
+    $$\Delta f = \max_{x,y \in \mathbb{N}^{|\mathcal{X}|}, ||x-y||_1 = 1} ||f(x) - f(y)||_1$$
+    That is, it's the maximum distance the output can vary based on one individual's data. It can be considered an upper bound on how much we must perturb the output of the function to preserve privacy.
+\end{mdframed}
+
+When perturbing such a function, noise taken from the Laplace Distribution has neat properties for differential privacy.
+
+\newcommand{\laplace}{\text{Lap}}
+
+\textbf{The Laplace Distribution} is defined with a scale $b$, and has the probability density function
+$$\laplace(x|b) = \frac{1}{2b} \exp \left( -\frac{|x|}{b} \right)$$
+The variance of this distribution is $\sigma^2 = 2b^2$.
+
+We can use this to perturb each entry in a database in order to provide differential privacy. Specifically \textbf{the Laplace Mechanism} is defined as
+$$\mathcal{M}_L(x, f(\cdot), \epsilon) = f(x) + (Y_1, \dots, Y_k)$$
+where $Y_i$ are independent and identically distributed random variables drawn from $\laplace(\Delta f/\epsilon)$.
+
+
 
 \end{document}
