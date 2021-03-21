@@ -32,10 +32,9 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
     from typing import Tuple
 
-    eps = 1
     max_value = 1e6
 
-    def calc(n: int) -> Tuple[float, float]:
+    def calc(n: int, eps: float) -> Tuple[float, float]:
         counter = Counter(eps, max_value)
         values = [random.uniform(0, max_value) for _ in range(n)]
         bits = [counter.one_bit(values[i]) for i in range(n)]
@@ -44,16 +43,25 @@ if __name__ == "__main__":
             counter.mean(bits)
         )
 
-    x = [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]
-    results = [calc(int(n)) for n in x]
-    y_1 = [y[0] for y in results]
-    y_2 = [y[1] for y in results]
+    populations = [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]
+    epsilons = [0.1, 0.5, 1]
 
-    plt.title("Mean estimation (eps={}, max={})".format(eps, max_value))
-    plt.xlabel("Population size")
-    plt.xscale("log")
-    plt.ylabel("Mean")
-    plt.plot(x, y_1, label="Real mean")
-    plt.plot(x, y_2, label="Private mean")
-    plt.legend()
-    plt.show()
+    fig, axs = plt.subplots(nrows=len(epsilons), figsize=(12, 12), sharey=True)
+    fig.suptitle("Mean estimation (max={})".format(max_value))
+    for i in range(len(epsilons)):
+        eps = epsilons[i]
+        results = [calc(int(n), eps) for n in populations]
+        y_1 = [y[0] for y in results]
+        y_2 = [y[1] for y in results]
+
+        p = axs[i]
+        p.set_title("eps={}".format(eps))
+        p.set_xlabel("Population size")
+        p.set_xscale("log")
+        p.set_ylabel("Mean")
+        p.plot(populations, y_1, label="Real mean")
+        p.plot(populations, y_2, label="Private mean")
+        p.legend()
+
+    fig.tight_layout()
+    fig.show()
