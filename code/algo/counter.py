@@ -35,6 +35,7 @@ if __name__ == "__main__":
     max_value = 1e6
 
     def calc(n: int, eps: float) -> Tuple[float, float]:
+        """Generates n random values, and calculates both their actual and their estimated mean"""
         counter = Counter(eps, max_value)
         values = [random.uniform(0, max_value) for _ in range(n)]
         bits = [counter.one_bit(values[i]) for i in range(n)]

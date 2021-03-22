@@ -76,6 +76,7 @@ if __name__ == "__main__":
     clients = [HistogramClient(histogram) for _ in range(max(populations))]
 
     def private_hist(ax, eps: float, values: List[float]):
+        """Draws a histogram of values after being sent through our private histogram estimation"""
         print("Private hist for {} values at eps={}".format(len(values), eps))
         old_eps = histogram.eps
         histogram.eps = eps
@@ -87,10 +88,11 @@ if __name__ == "__main__":
         histogram.eps = old_eps
         ax.bar(
             range(len(histo)),
-            histo
+            histo,
+            width=1.0
         )
 
-    # plot
+    # set up plot
     fig, axs = plt.subplots(nrows=len(populations),
                             ncols=len(epsilons)+1, figsize=(12, 12))
     axs[0, 0].set_title("Real values")
