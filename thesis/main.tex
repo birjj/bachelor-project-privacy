@@ -4,7 +4,11 @@
 \usepackage{graphicx}
 \usepackage{setspace}
 \usepackage{tabularx}
+\usepackage{xcolor}
 \usepackage[pdfpagelabels]{hyperref}
+
+% custom commands
+\newcommand{\todo}[1]{{\color{red}#1}}
 
 \begin{document}
 
@@ -65,6 +69,16 @@ Todo
 \stepcounter{page}
 
 \section{Introduction}
+
+Privacy-preserving data collection has long been an area of interest for many, but never before has it seen as significant focus as it has over the last few decades. With the advent of the Internet, and the global shift towards highly connected lifestyles that comes with it, data can now be gathered from almost every aspect of our lives---and with that comes a need to guarantee user privacy.
+
+For a long time this has been attempted primarily through techniques that ``anonymizes'' incoming data, attempting to remove any information that may lead to privacy loss. Unfortunately this approach has shown itself to be fallible: without formal guarantees, it relies on the foresight of the data analysts who decide what data to remove, which often leads to de-anonymization when auxiliary data---or simply insufficient anonymization---is present.
+
+\bigskip
+
+In recent years, an alternative approach has emerged in the form of \emph{differential privacy}. By introducing a formal description of "privacy loss", differential privacy not only offers a way to describe and compare differentially private algorithms, but also guarantees that the privacy provided by such algorithms does not falter in the presence of unforeseen auxiliary information or attack approaches.
+
+In this \todo{dissertation?} we will be exploring the definition of differential privacy, the guarantees it provides (and which ones it doesn't), and how common statistical problems are solved in differentially private ways. We will put particular focus on what's known as \emph{local differential privacy}. Finally, we will be exploring one particular algorithm for differentially private telemetry collection.
 
 \section{Differential privacy}
 
