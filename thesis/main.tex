@@ -1,72 +1,23 @@
-\documentclass[12pt]{article}
-\usepackage[utf8]{inputenc}
-\usepackage[a4paper,top=2.1cm,bottom=2.1cm,left=2.4cm,right=2.4cm]{geometry}
-\usepackage{graphicx}
-\usepackage{setspace}
-\usepackage{tabularx}
-\usepackage{xcolor}
-\usepackage[pdfpagelabels]{hyperref}
+\include{includes/head}
+\addbibresource{sources.bib}
 
 % custom commands
 \newcommand{\todo}[1]{{\color{red}#1}}
 
 \begin{document}
 
-\pagenumbering{arabic}
-
-\begin{titlepage}
-\Large
-\includegraphics[width=0.4\textwidth]{imgs/logo.png}
-\renewcommand{\thepage}{Title}
-\thispagestyle{empty}
-   \begin{center}
-       \vspace*{1cm}
-\linespread{1.25}
-       {\doublespacing \Huge\textbf{Title}}
-\linespread{1}
-       \rule{\linewidth}{1pt}
-       {\huge Bachelor Thesis \\
-       \Large Department of Mathematics and Computer Science, \\
-       University of Southern Denmark}
-\end{center}
-\vspace{5cm}
-\Large
-\begin{tabularx}{\textwidth}{lXr}
-Author & & Name \\ \\
-\end{tabularx}
-\begin{tabularx}{\textwidth}{lXr}
-Supervisor & & Jacopo Mauro\\ \\
-\end{tabularx}
-\begin{tabularx}{\textwidth}{lXr}
-Co-supervisor & & XXX \\ \\
-\end{tabularx}
-
-\vfill
-\large \today
-\end{titlepage}
-
-\thispagestyle{empty}
-
-\include{0-abstract}
-
-\thispagestyle{empty}
-\tableofcontents
-\thispagestyle{empty}
-\newpage
-\stepcounter{page}
+\include{includes/titlepage}
 
 \renewcommand{\abstractname}{Abstract}
 \begin{abstract}
-Todo
+\todo{Todo}
 \end{abstract}
 
 \begin{center} \bf Keywords \end{center}
 
 \thispagestyle{empty}
 \tableofcontents
-\thispagestyle{empty}
 \newpage
-\stepcounter{page}
 
 \section{Introduction}
 
@@ -103,11 +54,6 @@ In this \todo{dissertation?} we will be exploring the definition of differential
 \subsubsection{Results}
 
 \section{Discussion}
-
-\cite{test}
-
-\bibliography{biblio.bib}
-\bibliographystyle{plain}
 
 % appendix if needed
 
