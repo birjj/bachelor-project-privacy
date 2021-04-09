@@ -1,5 +1,5 @@
 \include{includes/head}
-\addbibresource{sources.bib}
+\addbibresource{main.bib}
 
 % custom commands
 \newcommand{\todo}[1]{{\color{red}#1}}
@@ -21,7 +21,7 @@
 
 \section{Introduction}
 
-Privacy-preserving data collection has long been an area of interest for many, but never before has it seen as significant focus as it has over the last few decades. With the advent of the Internet, and the global shift towards highly connected lifestyles that comes with it, data can now be gathered from almost every aspect of our lives---and with that comes a need to guarantee user privacy.
+Privacy-preserving data collection has long been an area of interest for many, but never before has it seen as significant focus as it has over the last few decades. With the advent of the Internet, and the global shift towards highly connected lifestyles that comes with it, data can now be gathered from almost every aspect of our lives---and with that comes a need to guarantee subject privacy.
 
 For a long time this has been attempted primarily through techniques that ``anonymizes'' incoming data, attempting to remove any information that may lead to privacy loss. Unfortunately this approach has shown itself to be fallible: without formal guarantees, it relies on the foresight of the data analysts who decide what data to remove, which often leads to de-anonymization when auxiliary data---or simply insufficient anonymization---is present.
 
@@ -29,13 +29,37 @@ For a long time this has been attempted primarily through techniques that ``anon
 
 In recent years, an alternative approach has emerged in the form of \emph{differential privacy}. By introducing a formal description of "privacy loss", differential privacy not only offers a way to describe and compare differentially private algorithms, but also guarantees that the privacy provided by such algorithms does not falter in the presence of unforeseen auxiliary information or attack approaches.
 
-In this \todo{dissertation?} we will be exploring the definition of differential privacy, the guarantees it provides (and which ones it doesn't), and how common statistical problems are solved in differentially private ways. We will put particular focus on what's known as \emph{local differential privacy}. Finally, we will be exploring one particular algorithm for differentially private telemetry collection.
+In this \todo{thesis?} we will be exploring the definition of differential privacy, the guarantees it provides (and which ones it doesn't), and how common statistical problems are solved in differentially private ways. We will put particular focus on what's known as \emph{local differential privacy}. Finally, we will be exploring one particular algorithm for differentially private telemetry collection.
 
 \section{Differential privacy}
 
-\subsection{Motivation/Historical context}
+\subsection{Motivation}
 
-\subsection{The promise of differential privacy}
+Before exploring the concept of differential privacy, it is worthwhile to spend some time understanding the problem that it aims to solve. \bigskip
+
+As data scientists, we often want to guarantee subjects (meaning the people whose responses our database is built from) that no ``private data'' can be leaked. This is especially important when working with sensitive data, like medical histories or crime statistics, where the consequences of privacy breaches are significant.
+
+Giving such a guarantee naturally requires defining what it means to reveal ``private data''. Intuitively we have to balance our interest in interesting research with our interest in protecting subject privacy: we cannot reveal \emph{nothing}, as that would make it impossible to conclude anything worthwhile, but we also cannot reveal too much, as that would violate our promise of privacy. The question then is: what can (and can't) we reveal?
+
+The common distinction is made between data that enables identification of the subjects, and data that doesn't. This builds on the intuition that a subject's privacy specifically relates to knowing something about \emph{them}, and cannot be harmed without some link between them and the data.
+
+Consider the example of a smoker who participated in a study related to lung cancer: if the database of the study is released unmodified, it will be trivial for anyone to determine whether they had lung cancer, which would certainly be considered a breach of privacy. If the database is modified in such a way that no participant can be identified, it might be possible to determine that \emph{someone} had lung cancer, but not who it was. In order for the database to be useful, it must also be possible to draw interesting conclusions (such as a link between smoking and lung cancer) from the database, despite the anonymization efforts. It is interesting to note that this enables people who already know that the subject is a smoker to learn something new about them (such as that they have an increased risk of lung cancer), but that we do not consider this a breach of privacy---in fact this could be learned even if the subject \emph{hadn't} participated in the study. \todo{We will delve into further details on what this notion of privacy does, and does not, encompass in section \ref{sec:promise}.} \bigskip
+
+Historically the privacy guarantees given by various anonymization techniques have been much more limited than the one described above, protecting primarily against specific and limited attacks. It has been particularly difficult to protect subject privacy in the so-called ``non-interactive'' setting\footnote{As opposed to the ``interactive'' setting, where the data collector keeps the dataset private, but allows users to query the data in some limited way.}, where datasets are published publicly after some form of anonymization. In this setting the primary defense has been the removal of known identifiers, such as names and birthdates, or other limitation of information from the dataset through techniques like sub-sampling.
+
+The problem with these defenses is that they are often vulnerable to unforeseen auxiliary data, and they cannot be generalized across different projects. Although the removal of birthdates and names may be sufficient for one use case, that doesn't mean they are generally sufficient: in fact there have been numerous real-world examples where data scientists have released what they believed to be ``anonymized'' datasets, ranging from medical records to social networking data, just to have them be successfully de-anonymized by researchers (see e.g. \cite{reidentification2011}).
+
+Consider the previous example of a smoker participating in a study related to lung cancer. The data collector may argue that by aggregating the data by age groups, such that the only information released is how many subjects in each age group tested positive for lung cancer, each individual subject are protected against identification. Nonetheless, a neighbor may know that the subject is participating in the study, be able to observe on which days they leave for the hospital, and know that the study releases updated statistics frequently. Armed with this auxiliary information, even the previously innocuous-seeming aggregate information may be enough to make an educated guess, or even identify, whether the subject in question has been diagnosed with lung cancer by simply observing changes in the expected age group. \bigskip
+
+An alternative approach that has regained popularity in the last 20 years is based on perturbing the data by introducing noise.
+
+A classic example is that of randomized response, where subjects are asked to answer randomly to some degree: prior to answering some sensitive yes/no question they are asked to flip a coin. If the coin lands on heads, they should answer truthfully. If not, they should answer ``yes''\footnote{Or ``no'' if that is the sensitive option. In some variants they are asked to flip a second coin and answer ``yes'' if it lands on heads, ``no'' otherwise.}. In this way subjects have a degree of \emph{plausible deniability}---even if they answered ``yes'' to a sensitive question, they can later claim that that coin simply landed on tails. The data collector is nonetheless able to calculate the expected proportion of respondents with each true answer using simple mathematics (although with significant uncertainty for small survey sizes).
+
+This intuition can be extended further, and combined with other approaches. Take the example from earlier, where a neighbor was able to guess whether a subject had lung cancer by observing aggregate statistics. Had the data collector added noise to those statistics, the neighbor would have no way of knowing whether an increase in the number of subjects with lung cancer was a result of an actual diagnosis, or merely the result of the noise---assuming the noise was correctly applied. \bigskip
+
+A natural question then is ``how---and how much---should we perturb our data in order to protect subject privacy adequately''. It is this question that differential privacy aims to answer.
+
+\subsection{The promise of differential privacy \label{sec:promise}} 
 
 \subsection{Mathematical definition}
 
