@@ -3,6 +3,8 @@
 
 % custom commands
 \newcommand{\todo}[1]{{\color{red}#1}}
+% shorthand command aliases
+\newcommand{\fancy}{\mathcal}
 
 \begin{document}
 
@@ -57,11 +59,42 @@ A classic example is that of randomized response, where subjects are asked to an
 
 This intuition can be extended further, and combined with other approaches. Take the example from earlier, where a neighbor was able to guess whether a subject had lung cancer by observing aggregate statistics. Had the data collector added noise to those statistics, the neighbor would have no way of knowing whether an increase in the number of subjects with lung cancer was a result of an actual diagnosis, or merely the result of the noise---assuming the noise was correctly applied. \bigskip
 
-A natural question then is ``how---and how much---should we perturb our data in order to protect subject privacy adequately''. It is this question that differential privacy aims to answer.
+With so many different ways to implement privacy, a natural question is ``how---and how much---should we perturb our data in order to protect subject privacy adequately''. It is this question that differential privacy aims to provide a way to answer.
 
-\subsection{The promise of differential privacy \label{sec:promise}} 
+\subsection{Differential privacy \label{sec:promise}} 
 
-\subsection{Mathematical definition}
+Differential privacy was first formulated in 2006 by Dwork et al. \cite{dworketal2006}. It tackles the problem of how we can mathematically guarantee that the privacy of a subject cannot be breached by the output of some algorithm (e.g. a query on a database)---and how we can design algorithms that provide such guarantees.
+
+It expands on the intuition we built earlier: as we cannot reveal \emph{nothing} while maintaining some level of utility\footnote{Which is formally proven by Dwork in the followup paper \cite{dwork2006_diffpriv}.}, we must reveal \emph{something} about our subjects. What is important is that we don't reveal anything significant about the data any of our subjects contributed; whether or not any one subject was even in the study shouldn't change the result to any meaningful degree.
+
+If we can provide this guarantee to our subjects, then their decision of whether or not to participate in the study becomes a lot easier: whether they contribute to the result or not, it will be essentially the same---any impact our result would have on them would happen even if they chose not to participate.
+
+In a followup paper \cite{dwork2006_diffpriv} Dwork defines differential privacy as follows:
+
+\begin{mdframed}
+    \textbf{Differential privacy:}\\A randomized function $\fancy{K}$ gives $\epsilon$-differential privacy if for all data sets $D_1$ and $D_2$ differing on at most one element, and all $S \subseteq \text{Range}(\fancy{K})$,
+    \begin{equation}\label{eq:diffpriv}
+        \Pr[\fancy{K}(D_1) \in S] \leq \exp(\epsilon) \cdot \Pr[\fancy{K}(D_2) \in S]
+    \end{equation}
+\end{mdframed}
+
+This definition is simple, but it is important in many ways.
+
+For one, it gives us a formal measurement for just how private any algorithm is. This enables us to compare algorithms, even across problem statements. When modifying an algorithm, or compositing it with another algorithm, we are now able to describe how that changes the privacy guarantees it gives; in many cases this can be done generally, giving us composition theorems that hold for any $\epsilon$-differentially private algorithms.
+
+Having such a formal measurement further allows us to communicate the guarantees given by our algorithms. It allows subjects to compare and evaluate surveys based on a simple measurement; this is especially important in a world where privacy-preservation is starting to become a legislated requirement in many parts of the world, a process that has historically been difficult and vague as a result of poor formal definitions. \bigskip
+
+Although this definition only describes privacy for a single individual, it extends naturally to group privacy: for any two data sets differing on at most $c$ elements, the probabilities differ by a factor of at most $\exp(c\epsilon)$. Although we have not yet explored what reasonable values for $\epsilon$ are, it's worth noting that we cannot provide reasonable privacy for groups that are big relative to our population size: after all, the goal of our survey is to say something about our population (or some large subset of our population). As such we can already conclude that the value $\exp(c\epsilon)$ must be unreasonable for large $c$.\bigskip
+
+It's important to be aware of what differential privacy does, and does not, protect.
+
+From equation (\ref{eq:diffpriv}) it is clear that the output of a private algorithm does not significantly depend on the contribution of any one individual; in other words, our understanding of ``privacy'' is such that almost nothing can be learnt about the \emph{contribution} a subject made based on the output of our algorithm. One might be quick to say that this means that nothing can be learnt about the \emph{subject} based on the output of our algorithm, but that is not entirely true.
+
+In particular, differential privacy does not protect against information being learnt about a subject as a result of other subject's contributions. We saw this in a previous example where anyone who knew that our subject was a smoker would also learn that they have a heightened risk of lung cancer even if the survey is differentially private.
+
+A similar oft-used example is that of an insurance company deciding on a premium for a subject that has participated in a differentially private survey on traffic accidents. As the survey was differentially private, it cannot reveal anything about whether or not the subject in particular has been in a traffic accident---but it \emph{can} reveal whether the subject is more likely to be in a traffic accident, e.g. based on age, as an aggregate result of other subject's data.
+
+We do not consider these results to be privacy breaches. Although they reveal something about a subject, the definition of differential privacy ensures that even if the subject \emph{hadn't} participated, our results wouldn't notably change. 
 
 \subsection{Composition theorems}
 
