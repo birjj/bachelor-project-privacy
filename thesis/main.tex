@@ -1,8 +1,11 @@
+\documentclass[12pt]{article}
+
 \include{includes/head}
 \addbibresource{main.bib}
 
 % custom commands
 \newcommand{\todo}[1]{{\color{red}#1}}
+\newcommand{\comment}[1]{}
 % shorthand command aliases
 \newcommand{\fancy}{\mathcal}
 
@@ -37,72 +40,120 @@ In this \todo{thesis?} we will be exploring the definition of differential priva
 
 \subsection{Motivation}
 
-Before exploring the concept of differential privacy, it is worthwhile to spend some time understanding the problem that it aims to solve. \bigskip
+\begin{description}
+    \item[Setting] Interactive vs. non-interactive.
 
-As data scientists, we often want to guarantee subjects (meaning the people whose responses our database is built from) that no ``private data'' can be leaked. This is especially important when working with sensitive data, like medical histories or crime statistics, where the consequences of privacy breaches are significant.
-
-Giving such a guarantee naturally requires defining what it means to reveal ``private data''. Intuitively we have to balance our interest in interesting research with our interest in protecting subject privacy: we cannot reveal \emph{nothing}, as that would make it impossible to conclude anything worthwhile, but we also cannot reveal too much, as that would violate our promise of privacy. The question then is: what can (and can't) we reveal?
-
-The common distinction is made between data that enables identification of the subjects, and data that doesn't. This builds on the intuition that a subject's privacy specifically relates to knowing something about \emph{them}, and cannot be harmed without some link between them and the data.
-
-Consider the example of a smoker who participated in a study related to lung cancer: if the database of the study is released unmodified, it will be trivial for anyone to determine whether they had lung cancer, which would certainly be considered a breach of privacy. If the database is modified in such a way that no participant can be identified, it might be possible to determine that \emph{someone} had lung cancer, but not who it was. In order for the database to be useful, it must also be possible to draw interesting conclusions (such as a link between smoking and lung cancer) from the database, despite the anonymization efforts. It is interesting to note that this enables people who already know that the subject is a smoker to learn something new about them (such as that they have an increased risk of lung cancer), but that we do not consider this a breach of privacy---in fact this could be learned even if the subject \emph{hadn't} participated in the study. \todo{We will delve into further details on what this notion of privacy does, and does not, encompass in section \ref{sec:promise}.} \bigskip
-
-Historically the privacy guarantees given by various anonymization techniques have been much more limited than the one described above, protecting primarily against specific and limited attacks. It has been particularly difficult to protect subject privacy in the so-called ``non-interactive'' setting\footnote{As opposed to the ``interactive'' setting, where the data collector keeps the dataset private, but allows users to query the data in some limited way.}, where datasets are published publicly after some form of anonymization. In this setting the primary defense has been the removal of known identifiers, such as names and birthdates, or other limitation of information from the dataset through techniques like sub-sampling.
-
-The problem with these defenses is that they are often vulnerable to unforeseen auxiliary data, and they cannot be generalized across different projects. Although the removal of birthdates and names may be sufficient for one use case, that doesn't mean they are generally sufficient: in fact there have been numerous real-world examples where data scientists have released what they believed to be ``anonymized'' datasets, ranging from medical records to social networking data, just to have them be successfully de-anonymized by researchers (see e.g. \cite{reidentification2011}).
-
-Consider the previous example of a smoker participating in a study related to lung cancer. The data collector may argue that by aggregating the data by age groups, such that the only information released is how many subjects in each age group tested positive for lung cancer, each individual subject are protected against identification. Nonetheless, a neighbor may know that the subject is participating in the study, be able to observe on which days they leave for the hospital, and know that the study releases updated statistics frequently. Armed with this auxiliary information, even the previously innocuous-seeming aggregate information may be enough to make an educated guess, or even identify, whether the subject in question has been diagnosed with lung cancer by simply observing changes in the expected age group. \bigskip
-
-An alternative approach that has regained popularity in the last 20 years is based on perturbing the data by introducing noise.
-
-A classic example is that of randomized response, where subjects are asked to answer randomly to some degree: prior to answering some sensitive yes/no question they are asked to flip a coin. If the coin lands on heads, they should answer truthfully. If not, they should answer ``yes''\footnote{Or ``no'' if that is the sensitive option. In some variants they are asked to flip a second coin and answer ``yes'' if it lands on heads, ``no'' otherwise.}. In this way subjects have a degree of \emph{plausible deniability}---even if they answered ``yes'' to a sensitive question, they can later claim that that coin simply landed on tails. The data collector is nonetheless able to calculate the expected proportion of respondents with each true answer using simple mathematics (although with significant uncertainty for small survey sizes).
-
-This intuition can be extended further, and combined with other approaches. Take the example from earlier, where a neighbor was able to guess whether a subject had lung cancer by observing aggregate statistics. Had the data collector added noise to those statistics, the neighbor would have no way of knowing whether an increase in the number of subjects with lung cancer was a result of an actual diagnosis, or merely the result of the noise---assuming the noise was correctly applied. \bigskip
-
-With so many different ways to implement privacy, a natural question is ``how---and how much---should we perturb our data in order to protect subject privacy adequately''. It is this question that differential privacy aims to provide a way to answer.
+    \item[Privacy] We want to guarantee subject privacy (yet to be defined). Doing so requires defining what "private data" means---historically this has been done on a case-by-case basis, with the privacy guarantees being given against an attacker with some defined abilities and knowledge. This falters under unforeseen circumstances, such as auxiliary information or new capabilities.
+    
+    \item[Historical] At the time (2006) the prevailing approach was ``anonymizing'' the data through removing "personally identifiable information". What was and wasn't removed was largely decided on a case by case basis. Example: any of the numerous examples of US states releasing ``anonymized'' medical data, only to later be re-identified.
+    
+    Another approach that had been largely dormant for a few decades, but was gaining steam in the previous few years, was perturbing the data through random noise. This gives subjects privacy through plausible deniability. Example: randomized response.
+    
+    \item[Differential privacy] It is in this context that diff priv came to be. Following a line of research into noise-based perturbation, differential privacy aims to provide a formal measure for how much noise should be added. As it turns out, the specific approach used offers some interesting guarantees, which we will explore later.
+\end{description}
 
 \subsection{Differential privacy \label{sec:promise}} 
 
-Differential privacy was first formulated in 2006 by Dwork et al. \cite{dworketal2006}. It tackles the problem of how we can mathematically guarantee that the privacy of a subject cannot be breached by the output of some algorithm (e.g. a query on a database)---and how we can design algorithms that provide such guarantees.
-
-It expands on the intuition we built earlier: as we cannot reveal \emph{nothing} while maintaining some level of utility\footnote{Which is formally proven by Dwork in the followup paper \cite{dwork2006_diffpriv}.}, we must reveal \emph{something} about our subjects. What is important is that we don't reveal anything significant about the data any of our subjects contributed; whether or not any one subject was even in the study shouldn't change the result to any meaningful degree.
-
-If we can provide this guarantee to our subjects, then their decision of whether or not to participate in the study becomes a lot easier: whether they contribute to the result or not, it will be essentially the same---any impact our result would have on them would happen even if they chose not to participate.
-
-In a followup paper \cite{dwork2006_diffpriv} Dwork defines differential privacy as follows:
-
-\begin{mdframed}
-    \textbf{Differential privacy:}\\A randomized function $\fancy{K}$ gives $\epsilon$-differential privacy if for all data sets $D_1$ and $D_2$ differing on at most one element, and all $S \subseteq \text{Range}(\fancy{K})$,
-    \begin{equation}\label{eq:diffpriv}
+\begin{description}
+    \item[Differential privacy] Formulated in 2006 by Dwork et al. \cite{dworketal2006}. Gives a formal measure for a specific definition of ``privacy'' in algorithms (any process that takes our dataset and provides an output). Relies on the intuition that an algorithm cannot violate the privacy of someone whose data isn't used in it. If we could guarantee each subject that the output of our algorithm wouldn't change regardless of whether their data was used, then there wouldn't be any risk of privacy breaches from using their data.
+    
+    We can't actually guarantee that; revealing nothing while providing utility is impossible as proven in \cite{dwork2006_diffpriv}. Rather, we can quantify how close to this ``perfect'' notion we are.
+    
+    Specifically, for any two databases $D_1$ and $D_2$ differing in only one entry,
+    \begin{equation}
         \Pr[\fancy{K}(D_1) \in S] \leq \exp(\epsilon) \cdot \Pr[\fancy{K}(D_2) \in S]
     \end{equation}
-\end{mdframed}
-
-This definition is simple, but it is important in many ways.
-
-For one, it gives us a formal measurement for just how private any algorithm is. This enables us to compare algorithms, even across problem statements. When modifying an algorithm, or compositing it with another algorithm, we are now able to describe how that changes the privacy guarantees it gives; in many cases this can be done generally, giving us composition theorems that hold for any $\epsilon$-differentially private algorithms.
-
-Having such a formal measurement further allows us to communicate the guarantees given by our algorithms. It allows subjects to compare and evaluate surveys based on a simple measurement; this is especially important in a world where privacy-preservation is starting to become a legislated requirement in many parts of the world, a process that has historically been difficult and vague as a result of poor formal definitions. \bigskip
-
-Although this definition only describes privacy for a single individual, it extends naturally to group privacy: for any two data sets differing on at most $c$ elements, the probabilities differ by a factor of at most $\exp(c\epsilon)$. Although we have not yet explored what reasonable values for $\epsilon$ are, it's worth noting that we cannot provide reasonable privacy for groups that are big relative to our population size: after all, the goal of our survey is to say something about our population (or some large subset of our population). As such we can already conclude that the value $\exp(c\epsilon)$ must be unreasonable for large $c$.\bigskip
-
-It's important to be aware of what differential privacy does, and does not, protect.
-
-From equation (\ref{eq:diffpriv}) it is clear that the output of a private algorithm does not significantly depend on the contribution of any one individual; in other words, our understanding of ``privacy'' is such that almost nothing can be learnt about the \emph{contribution} a subject made based on the output of our algorithm. One might be quick to say that this means that nothing can be learnt about the \emph{subject} based on the output of our algorithm, but that is not entirely true.
-
-In particular, differential privacy does not protect against information being learnt about a subject as a result of other subject's contributions. We saw this in a previous example where anyone who knew that our subject was a smoker would also learn that they have a heightened risk of lung cancer even if the survey is differentially private.
-
-A similar oft-used example is that of an insurance company deciding on a premium for a subject that has participated in a differentially private survey on traffic accidents. As the survey was differentially private, it cannot reveal anything about whether or not the subject in particular has been in a traffic accident---but it \emph{can} reveal whether the subject is more likely to be in a traffic accident, e.g. based on age, as an aggregate result of other subject's data.
-
-We do not consider these results to be privacy breaches. Although they reveal something about a subject, the definition of differential privacy ensures that even if the subject \emph{hadn't} participated, our results wouldn't notably change. 
+    
+    \item[Privacy definition] It's worth exploring what this definition of privacy means. The guarantee that ``anything we reveal could (essentially) be revealed without your data'' doesn't mean that we won't reveal anything about our subject. Classic example of car insurance agent: our study may reveal that one of our subjects has a higher risk of being in traffic accidents due to being young, but it \emph{cannot} reveal any information that's specific to the subject---if knowledge of the subject in particular is required, then our subject cannot reveal it.
+    
+    \item[Meaning of $\epsilon$:] $\epsilon$ is considered the ``privacy budget'' of the algorithm in question (also called ``privacy measure'', ``privacy parameter'', \dots). An algorithm offering differential privacy at a given $\epsilon$ is called an $\epsilon$-differentially private algorithm.
+    
+    $\epsilon$ is a measure of how much privacy loss is permitted for any one entry, with high values permitting high privacy loss, and low values protecting subject privacy well. As it is used as an exponent, high values of $\epsilon$ quickly get out of hand---a $10$-differentially private algorithm allows for one of the outputs to be 22000 times more likely than the other, while a $2$-differentially private algorithm only allows up to 7 times.
+    
+    Generally we want low values of $\epsilon$ to protect subject privacy, but this naturally also means more noise, meaning our output will generally be farther from the true answer. As such, the goal is to find a low $\epsilon$ that still permits useful conclusions from the output. The specifics of such a tradeoff depend on the specific output form (\todo{TODO: find papers to reference for e.g. counting queries, histograms, \dots}).
+    
+    Failing to reach some specific level of $\epsilon$-differential privacy does not necessarily mean that the algorithm is not private. For example, the algorithm may simply be $2\epsilon$-differentially private---something that is essentially identical for low values of $\epsilon$. Even for high values of $\epsilon$, failing to meet the guarantee can mean anything from being essentially differentially private except for one output, to blatant privacy violations (e.g. releasing the dataset directly).
+\end{description}
 
 \subsection{Composition theorems}
 
-\subsection{Common applications}
+One of the great bonuses of differential privacy is that we can formally describe how much privacy loss we incur when combining or using differentially private algorithms.
 
-\subsection{Local differential privacy}
+\begin{description}
+    \item[Immunity to post-processing] Any algorithm that only uses the output of an $\epsilon$-differentially private algorithm is itself $\epsilon$-differentially private. For the post-processing function $f$ and the set of outputs $T=\{ r | f(r) \in S \}$ we have:
+    \begin{align*}
+        \Pr[f(\fancy{K}(D_1)) \in S] &= \Pr[\fancy{K}(D_1) \in T] \\
+        &\leq \\
+        \Pr[f(\fancy{K}(D_2)) \in S] &= \Pr[\fancy{K}(D_2) \in T],
+    \end{align*}
+    meaning that if $\fancy{K}$ is $\epsilon$-differentially private, then so is $f \circ \fancy{K}$.
+    
+    This proves it for deterministic functions. Can be extended to randomized functions \todo{(using method I don't understand; they can be decomposed into convex combination of deterministic functions, and a convex combination of diff priv functions are also diff priv?)}
+    
+    This is crucial because it formalizes an important aspect of our privacy guarantees. With this immunity we know that our guarantees cannot be compromised or harmed after the fact, by anyone who does not have access to our original dataset---unlike e.g. data sanitation techniques that may be de-anonymized later using linkage attacks.
+    
+    \item[Linear combination] Given both an $\epsilon_1$-differentially private algorithm $f(x)$ and an $\epsilon_2$-differentially private algorithm $g(x)$, their combination $h(x) = (f(x), g(x))$ is $\epsilon_1+\epsilon_2$-differentially private.
+    \begin{align*}
+        \frac{\Pr[h(x) = (r_1, r_2)]}{\Pr[h(y) = (r_1, r_2)]} &=\frac{ \Pr[f(x)=r_1]\Pr[g(x)=r_2]}{\Pr[f(y)=r_1]\Pr[g(x)=r_2]} \\
+        &= \left( \frac{\Pr[f(x)=r_1]}{\Pr[f(y)=r_1]} \right) \left( \frac{\Pr[g(x)=r_2]}{\Pr[g(y)=r_2]} \right) \\
+        &\leq \exp(\epsilon_1) \exp(\epsilon_2) = \exp(\epsilon_1 + \epsilon_2)
+    \end{align*}
+    
+    This can be extended to the combination of any number of algorithms.
+\end{description}
+
+\subsection{Achieving differential privacy}
+
+\begin{description}
+    \item[Laplace] For numeric functions (i.e. $f : \mathbb{N}^n \to \mathbb{R}^k$) we can make them differentially private by adding suitable noise to their output. The Laplace mechanism is one way of doing this.
+    
+    An important measure is the $\ell_1$-sensitivity of the function, defined as
+    \begin{equation}
+        \Delta f = \underset{\begin{subarray}{c}
+            x,y \in \mathbb{N}^{n} \\
+            ||x-y||_1 = 1
+        \end{subarray}}{\max} || f(x)-f(y) ||_1,
+    \end{equation}
+    i.e. the biggest difference any one entry can have on the output. Intuitively we could mask the contribution of any one entry by adding noise of this size.
+    
+    Another important definition for the Laplace mechanism is the Laplace distribution, whose density function is defined as
+    \begin{equation}
+        \text{Lap}(b,x) = \frac{1}{2b} \exp \left( -\frac{|x|}{b} \right).
+    \end{equation}
+    
+    Using this we can define create our $\epsilon$-differentially private function as
+    \begin{equation*}
+        f'(x) = f(x) + (Y_1, \dots, Y_k)
+    \end{equation*}
+    where $Y_i$ are independent random variables drawn from $Lap(\Delta f/\epsilon)$.
+    
+    \item[Exponential] The exponential mechanism is used for cases where the task is to choose the ``best'' response out of multiple choices. It does not add noise to the output, but rather 
+\end{description}
+
+\subsection{Variants of differential privacy}
+
+\begin{description}
+    \item[$(\epsilon, \delta)$-differential privacy] The guarantee of $\epsilon$-differential privacy is strong. In some cases it may be practical to weaken our guarantee a bit, e.g. to allow rare events to impact our output beyond what would be allowed normally.
+    
+    A variant of differential privacy, called $(\epsilon, \delta)$-differential privacy \cite{dwork2006_delta_diffpriv}, alters the definition slightly, such that for any two neighboring datasets $D_1$ and $D_2$,
+    \begin{equation}
+        \Pr[\fancy{K}(D_1) \in S] \leq \exp(\epsilon) \cdot \Pr[\fancy{K}(D_2) \in S] + \delta.
+    \end{equation}
+    
+    This definition allows algorithms that may not live up to the stronger guarantee of $\epsilon$-differential privacy (or which have large $\epsilon$ measures under that definition) to provide this weaker guarantee instead.
+    
+    This guarantee differs in some significant ways from the one provided by $\epsilon$-differential privacy. It allows the differential privacy guarantee to ``fail'' sometimes, giving outputs that---in the worst case---leak the presence (or absence) of the entry in question. For example, it allows the algorithm to have an output that \emph{never} happens, unless a particular entry is present---in which case it has a probability of at most $\delta$. If such an output is given, an attacker will know for certain that the entry is present.
+    
+    This is naturally undesirable. As such, low $\delta$ values are desired for $(\epsilon, \delta)$-differentially private algorithms, as this limits the likelihood of our privacy guarantee ``failing''. It is worth noting that the desirable range for $\delta$ depends on the population size. The likelihood of of a ``failure'' is at most $\delta$ for each entry in the dataset. As this guarantee is given independently for each entry, the expected probability of ``failure'' for any of our $n$ entries is $\delta \cdot n$---since we do not want this to happen, our $\delta$ must generally be smaller if we work on larger datasets.
+    
+    \item[Local differential privacy] Also known as ``randomized response''. Indicates that the perturbation of data is done client-side, such that nothing can be learnt about a subjects true answer even with full knowledge of the individuals reported answer.
+\end{description}
 
 \section{Experiments with low-population telemetry collection}
+
+\subsection{Introduction}
+
+A 2017 paper building on a local differentially private algorithm for repeatedly collecting metrics from subjects. Historically an issue has been that privacy guarantees quickly degrade over repeated collections, e.g. when collecting telemetry over time.
 
 \subsection{Introduction/Historical context}
 
