@@ -159,6 +159,42 @@ A 2017 paper building on a local differentially private algorithm for repeatedly
 
 \subsection{Low population experiments}
 
+\begin{description}
+    \item[Experiment setup] We wish to explore the effect of low population size on the utility of the mean and histogram estimation mechanisms described in \cite{microsoft_telemetry}. The paper tests the estimation errors of population sizes varying from $0.3\times10^6$ to $3\times10^6$, but does not test the errors for lower population sizes than this; this leaves many applications---such as telemetry collection by smaller companies than Microsoft---with little information on the applicability of the mechanisms.
+    
+    We test both estimation mechanisms on synthetic datasets sampled from constant, uniform and (truncated) normal distributions, similar to those used in the empirical evaluation in the paper.
+    
+    \item[Mean estimation]
+    
+    \item[Histogram estimation]
+    We aim to measure the \emph{histogram error} of the estimated histograms, defined as $\max_{v\in[k]} |\hat{h}(v)-h(v)|$ where $\hat{h}(v)$ is the estimated frequency of the bucket $v$, and $h(v)$ is the true frequency.
+    
+    In order for our results to be comparable to those of the original paper, we use similar parameters beyond the population size: we use $k=32$ evenly sized buckets on the range $[0,24]$, permanent memoization for repeated collection, but no output perturbation. We vary population size in the range $[10^3, 3\times10^5]$ and $\epsilon$ in the range $[0.1, 10]$. In order to minimize the impact of the random nature of the mechanisms, we calculate the histogram error at a given $\epsilon$ and population size by doing 10 estimations over our synthetic dataset and averaging the errors.
+    
+    The results can be seen in figure \ref{fig:histogram_errors}. As expected, low population sizes give significantly worse estimation errors: at $n=10^4$ and $\epsilon=1, d=1$ the average estimation error for our normal dataset is $0.3$, compared to just $0.045$ when $n=3\times10^5$. In other words, the bucket with the largest misestimation was off by $30\%$ at $n=10^4$. At $n=3\times10^5$ no bucket was misestimated by more than $4.5\%$.
+    
+    \begin{figure}
+        \centering
+        \subcaptionbox{Normal distribution}
+            {\includegraphics[width=0.6\textwidth]{imgs/histogram_err_normal.png}}
+        \subcaptionbox{Uniform distribution}
+            {\includegraphics[width=0.6\textwidth]{imgs/histogram_err_uniform.png}}
+        \subcaptionbox{Constant distribution}
+            {\includegraphics[width=0.6\textwidth]{imgs/histogram_err_constant.png}}
+        \caption{Estimation errors for the histogram mechanism at various $\epsilon$ and population sizes. Solid, dashed and dotted lines are $d=1,2,4$ respectively.}
+        \label{fig:histogram_errors}
+    \end{figure}
+    
+    Depending on the use case of the estimated histograms, it may be difficult to know the impact of the histogram error on the utility of the histogram. For the purpose of achieving a more intuitive understanding of the estimation error, a visual representation of the histogram estimation for our normal dataset can be seen in figure \ref{fig:histogram_matrix}.
+    
+    \begin{figure}
+        \centering
+        \includegraphics[width=\textwidth]{imgs/histogram_matrix.png}
+        \caption{Examples of estimated histograms for various $\epsilon$ and population sizes with $d=1$.}
+        \label{fig:histogram_matrix}
+    \end{figure}
+\end{description}
+
 \subsubsection{Results}
 
 \section{Discussion}
