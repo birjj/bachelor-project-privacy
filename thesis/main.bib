@@ -84,3 +84,84 @@
   location  = {Long Beach, California, USA},
   series    = {NIPS'17}
 }
+
+@inproceedings{precursor_2003,
+  author    = {Dinur, Irit and Nissim, Kobbi},
+  title     = {Revealing Information While Preserving Privacy},
+  year      = {2003},
+  isbn      = {1581136706},
+  publisher = {Association for Computing Machinery},
+  address   = {New York, NY, USA},
+  url       = {https://doi.org/10.1145/773153.773173},
+  doi       = {10.1145/773153.773173},
+  abstract  = {We examine the tradeoff between privacy and usability of statistical databases. We model a statistical database by an n-bit string d1,..,dn, with a query being a subset q ⊆ [n] to be answered by Σiεq di. Our main result is a polynomial reconstruction algorithm of data from noisy (perturbed) subset sums. Applying this reconstruction algorithm to statistical databases we show that in order to achieve privacy one has to add perturbation of magnitude (Ω√n). That is, smaller perturbation always results in a strong violation of privacy. We show that this result is tight by exemplifying access algorithms for statistical databases that preserve privacy while adding perturbation of magnitude \~{O}(√n).For time-T bounded adversaries we demonstrate a privacypreserving access algorithm whose perturbation magnitude is ≈ √T.},
+  booktitle = {Proceedings of the Twenty-Second ACM SIGMOD-SIGACT-SIGART Symposium on Principles of Database Systems},
+  pages     = {202–210},
+  numpages  = {9},
+  keywords  = {data reconstruction, subset-sums with noise, integrity and security},
+  location  = {San Diego, California},
+  series    = {PODS '03}
+}
+
+@incollection{precursor_2004,
+  doi       = {10.1007/978-3-540-28628-8_32},
+  url       = {https://doi.org/10.1007/978-3-540-28628-8_32},
+  year      = {2004},
+  publisher = {Springer Berlin Heidelberg},
+  pages     = {528--544},
+  author    = {Cynthia Dwork and Kobbi Nissim},
+  title     = {Privacy-Preserving Datamining on Vertically Partitioned Databases},
+  booktitle = {Advances in Cryptology {\textendash} {CRYPTO} 2004}
+}
+
+@inproceedings{precusor_2005,
+  doi       = {10.1145/1065167.1065184},
+  url       = {https://doi.org/10.1145/1065167.1065184},
+  year      = {2005},
+  publisher = {{ACM} Press},
+  author    = {Avrim Blum and Cynthia Dwork and Frank McSherry and Kobbi Nissim},
+  title     = {Practical privacy},
+  booktitle = {Proceedings of the twenty-fourth {ACM} {SIGMOD}-{SIGACT}-{SIGART} symposium on Principles of database systems  - {PODS} {\textquotesingle}05}
+}
+
+@misc{apple_differential,
+  title   = {Differential {Privacy}},
+  url     = {https://www.apple.com/privacy/docs/Differential_Privacy_Overview.pdf},
+  urldate = {2021-05-14},
+  note    = {publisher: Apple}
+}
+
+@inproceedings{google_rappor,
+  author    = {Erlingsson, \'{U}lfar and Pihur, Vasyl and Korolova, Aleksandra},
+  title     = {RAPPOR: Randomized Aggregatable Privacy-Preserving Ordinal Response},
+  year      = {2014},
+  isbn      = {9781450329576},
+  publisher = {Association for Computing Machinery},
+  address   = {New York, NY, USA},
+  url       = {https://doi.org/10.1145/2660267.2660348},
+  doi       = {10.1145/2660267.2660348},
+  abstract  = {Randomized Aggregatable Privacy-Preserving Ordinal Response, or RAPPOR, is a technology for crowdsourcing statistics from end-user client software, anonymously, with strong privacy guarantees. In short, RAPPORs allow the forest of client data to be studied, without permitting the possibility of looking at individual trees. By applying randomized response in a novel manner, RAPPOR provides the mechanisms for such collection as well as for efficient, high-utility analysis of the collected data. In particular, RAPPOR permits statistics to be collected on the population of client-side strings with strong privacy guarantees for each client, and without linkability of their reports. This paper describes and motivates RAPPOR, details its differential-privacy and utility guarantees, discusses its practical deployment and properties in the face of different attack models, and, finally, gives results of its application to both synthetic and real-world data.},
+  booktitle = {Proceedings of the 2014 ACM SIGSAC Conference on Computer and Communications Security},
+  pages     = {1054–1067},
+  numpages  = {14},
+  keywords  = {cloud computing, population statistics, privacy protection, crowdsourcing, statistical inference},
+  location  = {Scottsdale, Arizona, USA},
+  series    = {CCS '14}
+}
+
+@inproceedings{google_prochlo,
+  author    = {Bittau, Andrea and Erlingsson, \'{U}lfar and Maniatis, Petros and Mironov, Ilya and Raghunathan, Ananth and Lie, David and Rudominer, Mitch and Kode, Ushasree and Tinnes, Julien and Seefeld, Bernhard},
+  title     = {Prochlo: Strong Privacy for Analytics in the Crowd},
+  year      = {2017},
+  isbn      = {9781450350853},
+  publisher = {Association for Computing Machinery},
+  address   = {New York, NY, USA},
+  url       = {https://doi.org/10.1145/3132747.3132769},
+  doi       = {10.1145/3132747.3132769},
+  abstract  = {The large-scale monitoring of computer users' software activities has become commonplace, e.g., for application telemetry, error reporting, or demographic profiling. This paper describes a principled systems architecture---Encode, Shuffle, Analyze (ESA)---for performing such monitoring with high utility while also protecting user privacy. The ESA design, and its Prochlo implementation, are informed by our practical experiences with an existing, large deployment of privacy-preserving software monitoring.With ESA, the privacy of monitored users' data is guaranteed by its processing in a three-step pipeline. First, the data is encoded to control scope, granularity, and randomness. Second, the encoded data is collected in batches subject to a randomized threshold, and blindly shuffled, to break linkability and to ensure that individual data items get "lost in the crowd" of the batch. Third, the anonymous, shuffled data is analyzed by a specific analysis engine that further prevents statistical inference attacks on analysis results.ESA extends existing best-practice methods for sensitive-data analytics, by using cryptography and statistical techniques to make explicit how data is elided and reduced in precision, how only common-enough, anonymous data is analyzed, and how this is done for only specific, permitted purposes. As a result, ESA remains compatible with the established workflows of traditional database analysis.Strong privacy guarantees, including differential privacy, can be established at each processing step to defend against malice or compromise at one or more of those steps. Prochlo develops new techniques to harden those steps, including the Stash Shuffle, a novel scalable and efficient oblivious-shuffling algorithm based on Intel's SGX, and new applications of cryptographic secret sharing and blinding. We describe ESA and Prochlo, as well as experiments that validate their ability to balance utility and privacy.},
+  booktitle = {Proceedings of the 26th Symposium on Operating Systems Principles},
+  pages     = {441–459},
+  numpages  = {19},
+  location  = {Shanghai, China},
+  series    = {SOSP '17}
+}

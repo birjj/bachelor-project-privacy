@@ -32,11 +32,17 @@ For a long time this has been attempted primarily through techniques that ``anon
 
 \bigskip
 
-In recent years, an alternative approach has emerged in the form of \emph{differential privacy}. By introducing a formal description of "privacy loss", differential privacy not only offers a way to describe and compare differentially private algorithms, but also guarantees that the privacy provided by such algorithms does not falter in the presence of unforeseen auxiliary information or attack approaches.
+Historically it has been particularly challenging to provide formal guarantees in the ``non-interactive'' setting\footnote{As opposed to the ``interactive'' setting, where the data collector keeps the dataset private, but allows users to query the data in some limited way.}, where datasets are published publicly after some form of anonymization. In this setting the primary defense has been the removal of known identifiers, such as names and birthdates, or other limitation of information from the dataset through techniques like sub-sampling. These approaches have seen widespread use, including in particularly sensitive areas like health data, but have repeatedly fallen under re-identification attacks (see e.g. \cite{reidentification2011}).
 
-In this \todo{thesis?} we will be exploring the definition of differential privacy, the guarantees it provides (and which ones it doesn't), and how common statistical problems are solved in differentially private ways. We will put particular focus on what's known as \emph{local differential privacy}. Finally, we will be exploring one particular algorithm for differentially private telemetry collection.
+In recent years, an alternative approach has emerged in the form of \emph{differential privacy}. The culmination of a line of research explored in \cite{precursor_2003,precursor_2004,precusor_2005}, Dwork et al. formalize the concept in \cite{dworketal2006} by introducing their formal description of ``privacy loss''. Differential privacy not only offers a way to describe and compare differentially private algorithms, but also guarantees that the privacy provided by such algorithms does not falter in the presence of unforeseen auxiliary information or attack approaches.
 
-\section{Differential privacy}
+Differential privacy has since found considerable interest, both in academia and beyond. In the field of telemetry gathering alone it has seen use by companies like Apple \cite{apple_differential}, Google \cite{google_rappor,google_prochlo} and Microsoft \cite{dworketal2006,microsoft_telemetry}, amongst others.
+
+\bigskip
+
+In this thesis we will be exploring the definition of differential privacy, the guarantees it provides (and which ones it doesn't), and how common statistical problems are solved in differentially private ways. Finally, we will be exploring one particular algorithm for differentially private histogram estimation in the local setting \cite{microsoft_telemetry}, and evaluate its performance in low-population scenarios.
+
+\section{Differential privacy \label{sec:diffpriv}}
 
 \subsection{Motivation}
 
@@ -149,7 +155,7 @@ One of the great bonuses of differential privacy is that we can formally describ
     \item[Local differential privacy] Also known as ``randomized response''. Indicates that the perturbation of data is done client-side, such that nothing can be learnt about a subjects true answer even with full knowledge of the individuals reported answer.
 \end{description}
 
-\section{Experiments with low-population telemetry collection}
+\section{Experiments with low-population telemetry collection \label{sec:telemetry}}
 
 \subsection{Introduction}
 
@@ -210,12 +216,12 @@ A 2017 paper building on a local differentially private algorithm for repeatedly
 
 \section{Conclusions}
 
-Summary of results
+In this thesis we have explored the topic of differential privacy in chapter \ref{sec:diffpriv}. We have covered its definition and the meaning of the $\epsilon$ parameter. We have covered composition theorems describing the characteristics of combined differentially private algorithms, along with methods for achieving differential privacy for a group of common statistical problems. Finally we have covered common variants of differential privacy, extending the notion to other application areas.
 
-Discussion of what they mean
+In chapter \ref{sec:telemetry} we have further explored one specific differentially private algorithm. We have experimentally determined its characteristics for small population sizes, an area which was not covered in the original paper. We have applied a formal measure that better describes the distribution estimation capabilities than that used in the paper, and used it to describe the quality of the estimation as $\epsilon$ and population size varies. In particular, we have found that for practical values of $\epsilon$ (e.g. $\epsilon = 3$) the distributions improve significantly even for low population sizes, with the Wesserstein distance nearing 2 at a population size of $10^4$, reaching 1 at $n=10^5$. These results are promising for applications of the algorithm in analytical applications that do not have the user base of Windows 10, which the algorithm was developed for.
 
-Future work
+\bigskip
 
-% appendix if needed
+Future work may further explore differentially private algorithms; this is a rapidly evolving field, with ample opportunity for further research or literature review. In particular, the application of the memoization techniques from \cite{microsoft_telemetry} on other algorithms in order to extend their privacy guarantees to temporally repeated collection could be an area of interest, as this is a feature often used in telemetry collection.
 
 \end{document}
