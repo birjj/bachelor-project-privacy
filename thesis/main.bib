@@ -131,6 +131,14 @@
   note    = {publisher: Apple}
 }
 
+@article{apple_differential_loss,
+  author = {Tang, Jun and Korolova, Aleksandra and Bai, Xiaolong and Wang, Xueqiang and Wang, Xiaofeng},
+  year   = {2017},
+  month  = {09},
+  pages  = {},
+  title  = {Privacy Loss in Apple's Implementation of Differential Privacy on MacOS 10.12}
+}
+
 @inproceedings{google_rappor,
   author    = {Erlingsson, \'{U}lfar and Pihur, Vasyl and Korolova, Aleksandra},
   title     = {RAPPOR: Randomized Aggregatable Privacy-Preserving Ordinal Response},
@@ -164,4 +172,54 @@
   numpages  = {19},
   location  = {Shanghai, China},
   series    = {SOSP '17}
+}
+
+
+@inproceedings{ml_abadi,
+  address   = {Vienna Austria},
+  title     = {Deep {Learning} with {Differential} {Privacy}},
+  isbn      = {9781450341394},
+  url       = {https://dl.acm.org/doi/10.1145/2976749.2978318},
+  doi       = {10.1145/2976749.2978318},
+  language  = {en},
+  urldate   = {2021-05-16},
+  booktitle = {Proceedings of the 2016 {ACM} {SIGSAC} {Conference} on {Computer} and {Communications} {Security}},
+  publisher = {ACM},
+  author    = {Abadi, Martin and Chu, Andy and Goodfellow, Ian and McMahan, H. Brendan and Mironov, Ilya and Talwar, Kunal and Zhang, Li},
+  month     = oct,
+  year      = {2016},
+  pages     = {308--318}
+}
+
+@inproceedings{ml_shokri,
+  address   = {Monticello, IL},
+  title     = {Privacy-preserving deep learning},
+  isbn      = {9781509018246},
+  url       = {http://ieeexplore.ieee.org/document/7447103/},
+  doi       = {10.1109/ALLERTON.2015.7447103},
+  urldate   = {2021-05-16},
+  booktitle = {2015 53rd {Annual} {Allerton} {Conference} on {Communication}, {Control}, and {Computing} ({Allerton})},
+  publisher = {IEEE},
+  author    = {Shokri, Reza and Shmatikov, Vitaly},
+  month     = sep,
+  year      = {2015},
+  pages     = {909--910}
+}
+
+@article{ml_papernot,
+  title    = {Semi-supervised {Knowledge} {Transfer} for {Deep} {Learning} from {Private} {Training} {Data}},
+  url      = {https://arxiv.org/abs/1610.05755v4},
+  abstract = {Some machine learning applications involve training data that is sensitive, such as the medical histories of patients in a clinical trial. A model may inadvertently and implicitly store some of its training data; careful analysis of the model may therefore reveal sensitive information. To address this problem, we demonstrate a generally applicable approach to providing strong privacy guarantees for training data: Private Aggregation of Teacher Ensembles (PATE). The approach combines, in a black-box fashion, multiple models trained with disjoint datasets, such as records from different subsets of users. Because they rely directly on sensitive data, these models are not published, but instead used as "teachers" for a "student" model. The student learns to predict an output chosen by noisy voting among all of the teachers, and cannot directly access an individual teacher or the underlying data or parameters. The student's privacy properties can be understood both intuitively (since no single teacher and thus no single dataset dictates the student's training) and formally, in terms of differential privacy. These properties hold even if an adversary can not only query the student but also inspect its internal workings. Compared with previous work, the approach imposes only weak assumptions on how teachers are trained: it applies to any model, including non-convex models like DNNs. We achieve state-of-the-art privacy/utility trade-offs on MNIST and SVHN thanks to an improved privacy analysis and semi-supervised learning.},
+  language = {en},
+  urldate  = {2021-05-16},
+  author   = {Papernot, Nicolas and Abadi, Martín and Erlingsson, Úlfar and Goodfellow, Ian and Talwar, Kunal},
+  month    = oct,
+  year     = {2016}
+}
+
+@misc{us_census,
+  title   = {2020 {Census} {Data} {Products}: {Disclosure} {Avoidance} {Modernization}},
+  url     = {https://www.census.gov/programs-surveys/decennial-census/decade/2020/planning-management/process/disclosure-avoidance.html},
+  urldate = {2021-05-16},
+  journal = {census.gov}
 }
