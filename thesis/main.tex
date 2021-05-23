@@ -8,6 +8,8 @@
 \newcommand{\comment}[1]{}
 % shorthand command aliases
 \newcommand{\fancy}{\mathcal}
+% command redefinitions
+\renewcommand{\epsilon}{\varepsilon}
 
 \begin{document}
 
@@ -26,7 +28,7 @@
 
 \section{Introduction}
 
-Privacy-preserving data collection has long been an area of interest for many, but never before has it seen as significant focus as it has over the last few decades. With the advent of the Internet, and the global shift towards highly connected lifestyles that comes with it, data can now be gathered from almost every aspect of our lives---and with that comes a need to guarantee subject privacy.
+Privacy-preserving data collection has long been an area of interest for many, but never before has it seen as significant focus as it has over the last few decades. With the global shift towards connected lifestyles that comes with the advent of the Internet, data can now be gathered from almost every aspect of our lives---and with that comes a need to guarantee subject privacy.
 
 For a long time this has been attempted primarily through techniques that ``anonymizes'' incoming data, attempting to remove any information that may lead to privacy loss. Unfortunately this approach has shown itself to be fallible: without formal guarantees, it relies on the foresight of the data analysts who decides what data to remove, which often leads to de-anonymization when auxiliary data---or simply insufficient anonymization---is present.
 
@@ -40,7 +42,7 @@ Differential privacy has since been subject to considerable interest. It has see
 
 \bigskip
 
-In this thesis we will be exploring the definition of differential privacy, the guarantees it provides (and which ones it doesn't), and how common statistical problems are solved in differentially private ways. Finally, we will be exploring one particular algorithm for differentially private histogram estimation in the local setting \cite{microsoft_telemetry}, and evaluate its performance in low-population scenarios.
+In this thesis we will be exploring the definition of differential privacy. In section \ref{sec:diffpriv} we will explore its origins and definition. In section \ref{sec:composition} we will show some key theorems of differential privacy that allow us to describe how the privacy provided by algorithms is affected as they are composed. In section \ref{sec:achieving} we will describe some general mechanisms for designing private algorithms. In section \ref{sec:variants} we will describe common variants of differential privacy. Finally, we will be exploring one particular algorithm for differentially private histogram estimation in the local setting \cite{microsoft_telemetry}, and evaluate its performance in low-population scenarios.
 
 \section{Differential privacy \label{sec:diffpriv}}
 
@@ -78,9 +80,9 @@ The notion of privacy introduced in the paper relies on the intuition that an al
 
 This guarantee is unfortunately impossible to provide to all subjects. As proven by Dwork in the follow-up paper \cite{dwork2006_diffpriv}, revealing nothing about any subject while still providing utility is impossible. If we were to give this guarantee to each of our subjects, then we could not learn anything from our data set, rendering it useless. Instead, we can promise our subjects that the influence of their data on the output is \emph{almost} none---that the likelihood of seeing each possible output is almost the same with or without their data. This guarantee still gives them a strong degree of privacy through plausible deniability, depending on our definition of ``almost''. \bigskip
 
-Consider the example from earlier, with a subject participating in a study related to lung cancer. A third party may wish to use our output to learn something about the subject, in breach of the subjects privacy. With our guarantees it is very limited what they can learn: even if they see an output that indicates that the subject had lung cancer, they are almost as likely to see that output if the subject didn't have lung cancer. No matter the output, the certainty with which they can come to a conclusion one way or the other is limited by our guarantees.
+Consider the example from earlier, with a subject participating in a study related to lung cancer. An adversary may wish to use our output to learn something about the subject, in breach of the subjects privacy. With our guarantees it is very limited what they can learn: even if they see an output that indicates that the subject had lung cancer, they are almost as likely to see that output if the subject didn't have lung cancer. No matter the output, the certainty with which they can come to a conclusion one way or the other is limited by our guarantees.
 
-It's important to note that this doesn't mean that the third party can't learn \emph{anything} about our subject. If they're interested in information that doesn't depend on the subjects specific response---e.g. whether the subjects age group has a heightened risk of lung cancer---then our privacy guarantee does not protect this information. We only consider it a privacy breach if they can learn something that they wouldn't have been able to learn if the subject hadn't participated in the study. \bigskip
+It's important to note that this doesn't mean that the adversary can't learn \emph{anything} about our subject. If they're interested in information that doesn't depend on the subjects specific response---e.g. whether the subjects age group has a heightened risk of lung cancer---then our privacy guarantee does not protect this information. We only consider it a privacy breach if they can learn something that they wouldn't have been able to learn if the subject hadn't participated in the study. \bigskip
 
 
 This leads us to our definition of differential privacy, here formulated as done by Dwork in \cite{dwork2006_diffpriv}:
@@ -92,9 +94,12 @@ This leads us to our definition of differential privacy, here formulated as done
     \end{equation}
 \end{mdframed}
 
-This definition is simple, but important in many ways.
+For some use cases it may be more useful to state this as the equivalent inequality
+\begin{equation*}
+    \frac{\Pr[\fancy{K}(D_1) \in S]}{\Pr[\fancy{K}(D_2) \in S]} \leq \exp(\epsilon).
+\end{equation*}\bigskip
 
-Most importantly, it gives us a formal measure for just how private an algorithm is. The $\epsilon$ parameter describes just how close two probabilities have to be for us to consider them ``almost'' unchanged. This means that we are able to compare algorithms, even across problem statements, on how well they protect subject privacy. We are able to describe the effect that changes, such as composition with other algorithms, have on the privacy guarantees provided by an algorithm---in many cases this can even be done generally, giving us composition theorems that hold for any $\epsilon$-differentially private algorithm.
+This definition gives us a formal measure for just how private an algorithm is. The $\epsilon$ parameter describes just how close two probabilities have to be for us to consider them ``almost'' unchanged. This means that we are able to compare algorithms, even across problem statements, on how well they protect subject privacy. We are able to describe the effect that changes, such as composition with other algorithms, have on the privacy guarantees provided by an algorithm---in many cases this can even be done generally, giving us composition theorems that hold for any $\epsilon$-differentially private algorithm.
 
 Having such formal measures further allows us to communicate the guarantees given by our algorithms in concrete terms. Going from vague best effort guarantees to concrete and formally proven privacy protection is a big win for subject privacy. It allows subjects to compare and evaluate surveys based on a simple measurement; this is especially important in a world where privacy is becoming a bigger and bigger topic in the public discourse, while systems processing data are becoming more and more complex. Having formal guarantees also helps the legislative enforcement of privacy-preservation that is becoming prevalent in some parts of the world, a process that has historically been difficult and vague as a result of poor formal definitions. \bigskip
 
@@ -116,13 +121,13 @@ It is important to note that, although $\epsilon$ allows us to compare the priva
 
 \subsection{Attributes and composition theorems \label{sec:composition}}
 
-One of the great aspects of our definition of differential privacy is that we can formally describe attributes for algorithms, and how their privacy guarantees are affected by changes such as composition---and that we are able to do this generally, and not just for one specific algorithm.
+One of the great aspects of our definition of differential privacy is that we can formally prove attributes for differentially private algorithms, and how their privacy guarantees are affected by changes such as composition---and that we are able to do this generally, and not just for one specific algorithm.
 
 \subsubsection{Immunity to post-processing}
 
-One such attribute that we are able to formally prove is that of \emph{immunity to post-processing}. Recall our example from section \ref{sec:motivation}, where a neighbor was able to make an educated guess at whether a subject had lung cancer based on auxiliary data. This was an informal example of post-processing: the third party was able to combine auxiliary data with the survey output, and process it into a data set that violated the subject's privacy to a higher degree than the survey output on its own did. It is fairly simple to show that post-processing leading to privacy loss is \emph{not} possible for the output of differentially private algorithms (assuming the true data set is kept secret), as done in \cite{dwork_privacybook}:
+One such attribute that we are able to formally prove is that of \emph{immunity to post-processing}. Recall our example from section \ref{sec:motivation}, where a neighbor was able to make an educated guess at whether a subject had lung cancer based on auxiliary data. This was an informal example of post-processing: the adversary was able to combine auxiliary data with the survey output, and process it into a data set that violated the subject's privacy to a higher degree than the survey output on its own did. It is fairly simple to show that post-processing leading to privacy loss is \emph{not} possible for the output of differentially private algorithms (assuming the true data set is kept secret), as done in \cite{dwork_privacybook}:
 
-Let us imagine an $\epsilon$-differentially private algorithm $\fancy{K} : X \to R$. For any post-processing function $f : R \to R'$, we can show that the algorithm $f \circ \fancy{K}$ is also $\epsilon$-differentially private---that is, there are no post-processing functions that increase the privacy loss of the original algorithm. For any two neighboring data sets $D_1$ and $D_2$, and any event $S \subseteq R'$, we define $T = \{r|f(r) \in S\}$ to be the outputs of $\fancy{K}$ that lead to event $S$. Then we have
+Let us imagine an $\epsilon$-differentially private algorithm $\fancy{K} : \fancy{D} \to \fancy{R}$. For any post-processing function $f : \fancy{R} \to \fancy{R}'$, we can show that the algorithm $f \circ \fancy{K}$ is also $\epsilon$-differentially private---that is, there are no post-processing functions that increase the privacy loss of the original algorithm. For any two neighboring data sets $D_1$ and $D_2$, and any event $S \subseteq \fancy{R}'$, we define $T = \{r|f(r) \in S\}$ to be the outputs of $\fancy{K}$ that lead to event $S$. Then we have
 \begin{align*}
     \Pr[\fancy{K}(D_1) \in T] &= \Pr[f(\fancy{K}(D_1)) \in S]  \\
     &\leq \\
@@ -132,7 +137,7 @@ where the inequality follows from definition \ref{eq:diffpriv}. This shows that 
 
 It is important to note that this proof fails if $f$ has knowledge of the original data set. In this case the equalities do not hold, meaning the result is not necessarily $\epsilon$-differentially private. The immunity to post-processing therefore only holds when the input to $\fancy{K}$ is kept private. \bigskip
 
-This proof is crucial because it formalizes and important aspect of our privacy guarantee. With this immunity we know that our guarantee cannot be compromised or harmed after we release our data, by anyone who does not have access to our original data set---unlike many other anonymization techniques that can often be de-anonymized later as unexpected auxiliary data becomes available. If the data set is properly anonymized using differential privacy, and the original data set is discarded, then our privacy guarantees will hold perpetually, regardless of new techniques or auxiliary data being discovered.
+This proof formalizes an important aspect of our privacy guarantee. With this immunity we know that our guarantee cannot be compromised or harmed after we release our data, by anyone who does not have access to our original data set---unlike many other anonymization techniques that can often be de-anonymized later as unexpected auxiliary data becomes available. If the data set is properly anonymized using differential privacy, and the original data set is discarded, then our privacy guarantees will hold perpetually, regardless of new techniques or auxiliary data being discovered.
 
 \subsubsection{Group privacy}
 
@@ -169,56 +174,135 @@ This result is valuable to us. It tells us that we can combine differentially pr
 
 This is also an example of a composition theorem that allows us to practically apply the ``privacy budget'' philosophy as described in section \ref{sec:epsilon}. If the total work we perform on a data set is described by a set of $n$ differentially private algorithms, where we release the output of each, then this combination theorem tells us how high the $\epsilon$ value may be for each algorithm before we exceed our budget. \bigskip
 
-This combination theorem is the only composition theorem we will show for $\epsilon$-differential privacy. More advanced composition theorems exist for the differential privacy variant known as $(\epsilon,\delta)$-differential privacy which we will explore in section \ref{sec:variant_eps_delta}. These further composition theorems are beyond the scope of this thesis, but interested readers may refer to \cite[ch.~3]{dwork_privacybook}.
+This combination theorem is the only composition theorem we will show for $\epsilon$-differential privacy. More advanced composition theorems exist for the differential privacy variant known as $(\epsilon,\delta)$-differential privacy (see section \ref{sec:variant_eps_delta}), but are beyond the scope of this thesis. Interested readers may instead refer to \cite[ch.~3]{dwork_privacybook}.
 
 \subsection{Achieving differential privacy \label{sec:achieving}}
 
-\begin{description}
-    \item[Laplace] For numeric functions (i.e. $f : \mathbb{N}^n \to \mathbb{R}^k$) we can make them differentially private by adding suitable noise to their output. The Laplace mechanism is one way of doing this.
-    
-    An important measure is the $\ell_1$-sensitivity of the function, defined as
-    \begin{equation}
-        \Delta f = \underset{\begin{subarray}{c}
-            x,y \in \mathbb{N}^{n} \\
-            ||x-y||_1 = 1
-        \end{subarray}}{\max} || f(x)-f(y) ||_1,
-    \end{equation}
-    i.e. the biggest difference any one entry can have on the output. Intuitively we could mask the contribution of any one entry by adding noise of this size.
-    
-    Another important definition for the Laplace mechanism is the Laplace distribution, whose density function is defined as
-    \begin{equation}
-        \text{Lap}(b,x) = \frac{1}{2b} \exp \left( -\frac{|x|}{b} \right).
-    \end{equation}
-    
-    Using this we can define create our $\epsilon$-differentially private function as
-    \begin{equation*}
-        f'(x) = f(x) + (Y_1, \dots, Y_k)
-    \end{equation*}
-    where $Y_i$ are independent random variables drawn from $Lap(\Delta f/\epsilon)$.
-    
-    \item[Exponential] The exponential mechanism is used for cases where the task is to choose the ``best'' response out of multiple choices. It does not add noise to the output, but rather 
-\end{description}
+We have seen some of the useful proofs that give differential privacy its utility, but have yet to see an example of a differentially private algorithm. Our definition \ref{eq:diffpriv} does not specify anything about how the algorithm is constructed, only about the way it acts---but as we saw in section \ref{sec:diffpriv}, it does hint at one common implementation technique: noise perturbation.
 
-\subsection{Variants of differential privacy}
+This consists of adding noise to either the input or the output of the algorithm, so as to lessen the impact a single subjects data can have on the perturbed output. This noise has to be crafted with care, so as to ensure that the output lives up to the definition of differential privacy. In this section we will explore two common methods for designing such noisy algorithms, and show that they achieve differential privacy. \bigskip
+
+Before we do that, we will introduce a useful measure known as the $L_1$ sensitivity of an algorithm. This measures the biggest difference a single entry can cause in the output of the algorithm. Formally, we say that the $L_1$ sensitivity of an algorithm $f$ is the smallest number $\Delta f$ such that for any data sets $D_1,D_2$ differing in exactly one entry,
+\begin{equation}\label{eq:L1_sensitivity}
+    ||f(D_1)-f(D_2)||_1 \leq \Delta f.
+\end{equation}
+
+This measure is useful to us, as it intuitively measures how much noise we might have to add to mask the contribution of a single subject. For example, if the algorithm $f$ is a sum over the data set with each entry consisting of either the value $0$ or $1$, then we wouldn't have to mask a contribution of more than $\Delta f = 1$. For other algorithms, such as averaging over a data set with each entry being yearly wages in dollars, we have significantly higher (and potentially unbounded) $L_1$ sensitivity.
+
+As we will see we can use this $L_1$ sensitivity measure to scale the amount of noise to add to the algorithm to achieve a specific level of $\epsilon$-differential privacy.
+
+\subsubsection{The Laplace mechanism}
+
+One probability distribution that lends itself nicely to achieving differential privacy is the Laplace distribution $\text{Lap}(b)$. This distribution is centered on 0, has a standard deviation $b$, and a density function
+\begin{equation*}
+    h(x)\propto \exp\left(\frac{-|x|}{b}\right).
+\end{equation*}
+We will show that by drawing noise from this distribution and using it to perturb the output of a numeric algorithm $f$, we can achieve $\epsilon$-differential privacy---a process known as the Laplace mechanism \cite{dworketal2006}. \bigskip
+
+First, note that for any inputs $x,x'$ to this density function we have
+\begin{align*}
+    \frac{h(x)}{h(x')} &= \exp\left(\frac{-|x|}{b}-\frac{-|x'|}{b}\right) = \exp\left(\frac{|x'|-|x|}{b} \right) \\
+        &\leq \exp\left( \frac{|x'-x|}{b} \right) = \exp\left( \frac{|x-x'|}{b} \right)
+\end{align*}
+where the inequality comes from the triangle inequality.
+
+This means that if we define the perturbation of some numeric algorithm $f: \fancy{D} \to \mathbb{R}$ to be $f'(x) = f(x)+Y$ where $Y$ is a random variable drawn from $\text{Lap}(b)$, then we can combine this with definition \ref{eq:L1_sensitivity} when looking at two neighboring data sets $D_1,D_2$ to get
+\begin{align*}
+    \frac{\Pr[f'(D_1)=k]}{\Pr[f'(D_2)=k]} &= \frac{h(k - f(D_1))}{h(k - f(D_2))} \\
+        &\leq \exp\left( \frac{|f(D_1)-f(D_2)|}{b}\right) \\
+        &\leq \exp\left(\frac{\Delta f}{b}\right).
+\end{align*}
+From this we can see that if we draw $Y$ from the distribution $\text{Lap}(\Delta f/b)$ then $f'(x)$ becomes $\epsilon$-differentially private.
+
+This generalizes nicely to higher dimensions, meaning the perturbation of an algorithm $f : \fancy{D} \to \mathbb{R}^d$ defined as $f'(x) = f(x) + (Y_1,\dots,Y_d)$ is $\epsilon$-differentially private when $Y_i$ are independent random variables drawn from $\text{Lap}(\Delta f / \epsilon)$. \bigskip
+
+This result shows an easy way to achieve differential privacy for numeric algorithms by adding noise proportional to the sensitivity of the algorithm. This is particularly interesting for algorithms with low sensitivity. Notable examples of this includes counting queries (i.e. how many elements satisfy a given property) which have $\Delta f=1$ and disjoint partitioning (e.g. histograms) which have $\Delta f=2$. Other algorithms which have high sensitivity would require a lot of noise, worsening their utility. Alternate mechanisms exist that may be able to provide differential privacy with greater utility. Examples of this include smooth sensitivity \cite{nissim_smoothsens} which scales the noise not to the global sensitivity, but to the local sensitivity around each entry, as well as problem-specific algorithms that may not follow a generalized approach like the Laplace mechanism, but still provide differential privacy.
+
+\subsubsection{The exponential mechanism}
+
+While the Laplace mechanism is a useful and general approach to providing differential privacy for numeric functions. However, it is not always desirable to perturb the output of the algorithm, even if those perturbations may be small. Furthermore, there are many use cases where the algorithms we want to be private \emph{aren't} numeric, but have arbitrary ranges.
+
+The exponential mechanism \cite{sherry_exponentialmech} takes a slightly different approach, here described using notation from \cite{dwork_privacybook}. For an arbitrary algorithm $f : \fancy{D} \to \fancy{R}$ it introduces the concept of a utility measure $u : \fancy{D} \times \fancy{R} \to \mathbb{R}$. This utility measure gives a numeric value to any pair $(d,r)$ where $d \in \fancy{D}, r \in \fancy{R}$. The intuitive goal for the private algorithm $f'(d)$ then is to pick the value $r \in \fancy{D}$ for which $u(d,r)$ is maximized, and do so in a way that satisfies differential privacy.
+
+As we will be perturbing this utility measure we are interested in a sensitivity measure for it; since we are only interested in its sensitivity relative to the data set argument, we define this as the smallest number $\Delta u$ such that for any $r \in \fancy{R}$, and any two data sets $D_1,D_2 \in \fancy{D}$ differing in exactly one entry,
+\begin{equation}\label{eq:utility_sensitivity}
+    |u(D_1,r) - u(D_2,r)| \leq \Delta u.
+\end{equation}
+
+From here we define the actual mechanism to be
+\begin{equation*}
+    f'(d) = \text{ Return } r \in \fancy{R} \text{ with probability} \propto \exp\left( \frac{\epsilon u(d,r)}{2\Delta u} \right).
+\end{equation*}
+To show that this is differentially private we will once again look at two data sets $D_1,D_2$ differing in at most one entry, and some fixed output $r \in \fancy{R}$. If we name the proportional component $\lambda(d,r) = \exp \left( \epsilon u(d,r) / 2 \Delta u \right)$ we then have
+\begin{align}
+    \frac{\Pr[f'(D_1) = r]}{\Pr[f'(D_2) = r]} &= 
+                \left( \frac{\lambda(D_1,r)}{\sum_{r' \in \fancy{R}} \lambda(D_1,r')} \right)
+                /
+                \left( \frac{\lambda(D_2,r)}{\sum_{r' \in \fancy{R}} \lambda(D_2,r')} \right) \nonumber\\
+            &= \left( \frac{\lambda(D_1,r)}{\lambda(D_2,r)} \right) \cdot \left( \frac{\sum_{r'\in\fancy{R}} \lambda(D_2,r')}{\sum_{r'\in\fancy{R}} \lambda(D_1,r')} \right) \nonumber\\
+            &= \left( \frac{\exp(\epsilon u(D_1,r)/2\Delta u)}{\exp(\epsilon u(D_2,r)/2\Delta u)} \right) \cdot \left( \frac{\sum_{r'\in\fancy{R}} \lambda(D_2,r')}{\sum_{r'\in\fancy{R}} \lambda(D_1,r')} \right) \nonumber\\
+            &= \exp \left( \frac{\epsilon u(D_1,r)}{2\Delta u} - \frac{\epsilon u(D_2,r)}{2\Delta u} \right) \cdot \left( \frac{\sum_{r'\in\fancy{R}} \lambda(D_2,r')}{\sum_{r'\in\fancy{R}} \lambda(D_1,r')} \right) \nonumber\\
+            &= \exp \left( \frac{\epsilon (u(D_1,r) - u(D_2,r))}{2\Delta u}\right) \cdot \left( \frac{\sum_{r'\in\fancy{R}} \lambda(D_2,r')}{\sum_{r'\in\fancy{R}} \lambda(D_1,r')} \right) \nonumber\\
+            &\leq \exp \left( \frac{\epsilon \Delta u}{2\Delta u}\right) \cdot \left( \frac{\sum_{r'\in\fancy{R}} \lambda(D_2,r')}{\sum_{r'\in\fancy{R}} \lambda(D_1,r')} \right) \nonumber\\
+            &= \exp \left( \frac{\epsilon}{2} \right) \cdot \left( \frac{\sum_{r'\in\fancy{R}} \lambda(D_2,r')}{\sum_{r'\in\fancy{R}} \lambda(D_1,r')} \right) \label{eq:expmech}
+\end{align}
+where the inequality comes from definition \ref{eq:utility_sensitivity}. From the same definition we have that
+\begin{align*}
+    u(D_2,r) &= u(D_1,r) + u(D_2,r) - u(D_1,r) \\
+        &\leq u(D_1,r) + \Delta u
+\end{align*}
+$$\Downarrow$$
+\begin{align*}
+    \lambda(D_2,r) &= \exp\left( \frac{\epsilon u(D_2,r)}{2\Delta u} \right) \\
+        &\leq \exp\left( \frac{\epsilon u(D_1,r) + \epsilon\Delta u}{2\Delta u} \right) \\
+        &= \exp\left( \frac{\epsilon u(D_1,r)}{2\Delta u} + \frac{\epsilon}{2} \right) \\
+        &= \lambda(D_1,r) \cdot \exp \left( \frac{\epsilon}{2} \right)
+\end{align*}
+which can finally be used to rewrite equation \ref{eq:expmech} into
+\begin{align*}
+    \frac{\Pr[f'(D_1) = r]}{\Pr[f'(D_2) = r]} &\leq \exp \left( \frac{\epsilon}{2} \right) \cdot \left( \frac{\sum_{r'\in\fancy{R}} \lambda(D_2,r')}{\sum_{r'\in\fancy{R}} \lambda(D_1,r')} \right) \\
+        &\leq \exp\left( \frac{\epsilon}{2} \right) \cdot \left( \frac{\sum_{r'\in\fancy{R}} \lambda(D_1,r')\cdot \exp(\epsilon/2)}{\sum_{r'\in\fancy{R}} \lambda(D_1,r')} \right) \\
+        &= \exp\left( \frac{\epsilon}{2} \right) \cdot \exp\left( \frac{\epsilon}{2} \right) \cdot \left( \frac{\sum_{r'\in\fancy{R}} \lambda(D_1,r')}{\sum_{r'\in\fancy{R}} \lambda(D_1,r')} \right) \\
+        &= \exp(\epsilon).
+\end{align*}
+This proves that $f'$ is $\epsilon$-differentially private. \bigskip
+
+This mechanism offers some attributes that the Laplace mechanism does not: for one, it can be used for algorithms with arbitrary ranges, not just numeric ones. This makes it more generally applicable than the Laplace mechanism (in fact it covers every application of the Laplace mechanism with the utility function $u(d,r)=-|f(d)-r|$ \cite{sherry_exponentialmech}).
+
+In addition, the actual output of the algorithm is not perturbed, only the probability of picking the most ``ideal'' output is. This means that it is well suited for applications where the precise value of the output is important, e.g. auctions, where even small changes to the final price are unacceptable.
+
+As with any differentially private algorithm, it is of course important to note that there are no outputs in the range of $f'$ with probability 0, regardless of input---that is, there is some probability that $f'(d)$ will pick a ``bad'' output $r$ regardless of how low $u(d, r)$ is. As the value of $u(d,r)$ is used as an exponent in the proportional part $\lambda(d,r)$, this probability does however decrease quickly as the utility score lowers.
+
+\subsection{Models and variants of differential privacy \label{sec:variants}}
+
+The definition of $\epsilon$-differential privacy puts no restrictions on the specific way a private algorithm is implemented beyond the probability of each output. This makes it possible to implement private algorithms in multiple different ways, with different implications for each. We have already seen in the Laplace and exponential mechanisms examples of achieving privacy through perturbation of the output. In this section we will explore the case of \emph{local differential privacy}, which is an alternative approach that removes the need for subjects to trust the data collector with their true data. We will also explore a slightly extended variant of $\epsilon$-differential privacy, known as $(\epsilon,\delta)$-differential privacy.
+
+\subsubsection{Local differential privacy}
+
+The local model for differential privacy \cite{kasiv_localdiff} is an extension of the idea behind randomized response as introduced in section \ref{sec:motivation} (and is sometimes named after it). It describes a subset of $\epsilon$-differentially private algorithm for which each subject randomizes their own private data before entering it into the data set. This means there is no central data set of private data from which the output is computed; instead, the perturbation happens before the data is entered into the data set.
+
+Formally an algorithm is $\epsilon$-local if it works on a data set $D$ where each entry $x_i \in D$ is computed by an $\epsilon_i$-differentially private algorithm such that $\sum_{i\in\left[|D|\right]} \epsilon_i \leq \epsilon$. From the compositions theorems we showed in section \ref{sec:composition} it is clear that any $\epsilon$-local algorithm is also $\epsilon$-differentially private.
+
+The local model represents a significant shift in the trust model for private algorithms. In the global model, where a data collector collects a data set of private data before perturbing it, each subject must reveal their private data to at least one entity, the data collector. In the local model however, this is no longer necessary. Each user can be absolutely certain that their private data cannot be revealed unless they choose to release it. This is especially important in situations where the data collector cannot be trusted, or has an incentive to violate subject privacy; for this reason it is the local model that has been employed in many of the private telemetry algorithms for use by e.g. Google \cite{google_rappor}, Apple \cite{apple_differential} and Microsoft \cite{microsoft_telemetry}.
+
+It is worth noting however that the local model is strictly weaker than the global model. In addition to worse lower bounds on the error for the perturbed output, it also isn't every query that can be released under the global model that can be released under the local model \cite[sec.~12.1]{dwork_privacybook}.
 
 \subsubsection{$(\epsilon, \delta)$-differential privacy \label{sec:variant_eps_delta}}
 
-\begin{description}
-    \item[$(\epsilon, \delta)$-differential privacy] The guarantee of $\epsilon$-differential privacy is strong. In some cases it may be practical to weaken our guarantee a bit, e.g. to allow rare events to impact our output beyond what would be allowed normally.
-    
-    A variant of differential privacy, called $(\epsilon, \delta)$-differential privacy \cite{dwork2006_delta_diffpriv}, alters the definition slightly, such that for any two neighboring data sets $D_1$ and $D_2$,
-    \begin{equation}
-        \Pr[\fancy{K}(D_1) \in S] \leq \exp(\epsilon) \cdot \Pr[\fancy{K}(D_2) \in S] + \delta.
-    \end{equation}
-    
-    This definition allows algorithms that may not live up to the stronger guarantee of $\epsilon$-differential privacy (or which have large $\epsilon$ measures under that definition) to provide this weaker guarantee instead.
-    
-    This guarantee differs in some significant ways from the one provided by $\epsilon$-differential privacy. It allows the differential privacy guarantee to ``fail'' sometimes, giving outputs that---in the worst case---leak the presence (or absence) of the entry in question. For example, it allows the algorithm to have an output that \emph{never} happens, unless a particular entry is present---in which case it has a probability of at most $\delta$. If such an output is given, an attacker will know for certain that the entry is present.
-    
-    This is naturally undesirable. As such, low $\delta$ values are desired for $(\epsilon, \delta)$-differentially private algorithms, as this limits the likelihood of our privacy guarantee ``failing''. It is worth noting that the desirable range for $\delta$ depends on the population size. The likelihood of of a ``failure'' is at most $\delta$ for each entry in the data set. As this guarantee is given independently for each entry, the expected probability of ``failure'' for any of our $n$ entries is $\delta \cdot n$---since we do not want this to happen, our $\delta$ must generally be smaller if we work on larger data sets.
-    
-    \item[Local differential privacy] Also known as ``randomized response''. Indicates that the perturbation of data is done client-side, such that nothing can be learnt about a subjects true answer even with full knowledge of the individuals reported answer.
-\end{description}
+The privacy guarantees of $\epsilon$-differential privacy are strong. This is desirable as it means that any $\epsilon$-private algorithm is sure to act in a specific, well understood way. However, it also means that algorithms that fail to achieve $\epsilon$-differential privacy range from almost-private algorithms to those that offer no privacy whatsoever. For some use cases it may be useful to offer weaker guarantees, as these allow us to better describe algorithms that may not achieve $\epsilon$-differential privacy, but could achieve some other notion of privacy.
+
+Of particular interest is a variant of $\epsilon$-differential privacy known as $(\epsilon, \delta)$-differential privacy \cite{dwork2006_delta_diffpriv}. It alters definition \ref{eq:diffpriv} slightly such that for any two neighboring data sets $D_1$ and $D_2$,
+\begin{equation*}
+    \Pr[\fancy{K}(D_1) \in S] \leq \exp(\epsilon) \cdot \Pr[\fancy{K}(D_2) \in S] + \delta.
+\end{equation*}
+
+This additional $\delta$ term allows private algorithms to ``fail'' to uphold the $\epsilon$-differential privacy definition of privacy sometimes. It is especially impactful for rare events, where the probabilities are low, and $\delta$ is comparably high.
+
+This ``failure'' is worrisome from a privacy perspective. In particular, it allows events to have a probability of 0 unless a specific element is in the data set, in which case it has a probability of at most $\delta$. If such an event is seen, it causes a total privacy breach for the entry in question. This is naturally undesirable. As such, low $\delta$ values are desired for $(\epsilon,\delta)$-private algorithms.
+
+It is worth noting that, unlike the $\epsilon$ parameter, the desirable values for $\delta$ depend on the population size in question. The likelihood of a ``failure'' is at most $\delta$ for each entry in the data set. As this is given independently for each entry, the expected probability of a ``failure'' for any one of $n$ entries in a data set is $\delta n$.\bigskip
+
+The addition of the $\delta$ parameter allows considerably more freedom in terms of algorithm design. As $(\epsilon,\delta)$-differential privacy is a superset of $\epsilon$-differential privacy, every theorem that we have shown so far also holds for this new definition---but due to the relaxed privacy bounds, new theorems are applicable that are not applicable to our old definition. Of particular note is more advanced composition theorems \cite[Sec.~3.5.2]{dwork_privacybook}, which describe many of the compositions that may happen during real world usage.
 
 \section{Experiments with low-population telemetry collection \label{sec:telemetry}}
 
