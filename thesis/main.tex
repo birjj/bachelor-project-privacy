@@ -28,21 +28,21 @@
 
 \section{Introduction}
 
-Privacy-preserving data collection has long been an area of interest for many, but never before has it seen as significant focus as it has over the last few decades. With the global shift towards connected lifestyles that comes with the advent of the Internet, data can now be gathered from almost every aspect of our lives---and with that comes a need to guarantee subject privacy.
+Privacy-preserving data collection has long been an area of interest for many but never before has it seen as significant focus as it has over the last few decades. With the global shift towards connected lifestyles that comes with the advent of the Internet, data can now be gathered from almost every aspect of our lives---and with that comes a need to guarantee subject privacy.
 
-For a long time this has been attempted primarily through techniques that ``anonymizes'' incoming data, attempting to remove any information that may lead to privacy loss. Unfortunately this approach has shown itself to be fallible: without formal guarantees, it relies on the foresight of the data analysts who decides what data to remove, which often leads to de-anonymization when auxiliary data---or simply insufficient anonymization---is present.
-
-\bigskip
-
-Historically it has been particularly challenging to provide formal guarantees in the ``non-interactive'' setting\footnote{As opposed to the ``interactive'' setting, where the data collector keeps the data set private, but allows users to query the data in some limited way.}, where data sets are published publicly after some form of anonymization. In this setting the primary defense has been the removal of known identifiers, such as names and birthdates, or other limitation of information from the data set through techniques like sub-sampling. These approaches have seen widespread use, including in particularly sensitive areas like health data, but have repeatedly fallen under re-identification attacks (see e.g. \cite{reidentification2011}).
-
-In recent years, an alternative approach has emerged in the form of \emph{differential privacy}. The culmination of a line of research explored in \cite{precursor_2003,precursor_2004,precusor_2005}, Dwork et al. formalize the concept in \cite{dworketal2006} by introducing their formal description of ``privacy loss''. Differential privacy not only offers a way to describe and compare differentially private algorithms, but also guarantees that the privacy provided by such algorithms does not falter in the presence of unforeseen auxiliary information or attack approaches.
-
-Differential privacy has since been subject to considerable interest. It has seen numerous high-profile applications, including the 2020 US census \cite{us_census}, as well as data gathering from companies like Apple \cite{apple_differential,apple_differential_loss}, Google \cite{google_rappor,google_prochlo} and Microsoft \cite{dworketal2006,microsoft_telemetry}. Even beyond its roots in cryptography and statistics it has also found application in areas like machine learning \cite{ml_abadi,ml_shokri,ml_papernot}. With the growing focus on digital data collection and the privacy concerns that follow, differential privacy has become an important tool for academics and companies alike.
+For a long time, this has been attempted primarily through techniques that ``anonymizes'' incoming data, attempting to remove any information that may lead to privacy loss. Unfortunately, this approach has shown itself to be fallible: without formal guarantees, it relies on the foresight of the data analysts who decide what data to remove, which often leads to de-anonymization when auxiliary data---or simply insufficient anonymization---is present.
 
 \bigskip
 
-In this thesis we will be exploring the definition of differential privacy. In section \ref{sec:diffpriv} we will explore its origins and definition. In section \ref{sec:composition} we will show some key theorems of differential privacy that allow us to describe how the privacy provided by algorithms is affected as they are composed. In section \ref{sec:achieving} we will describe some general mechanisms for designing private algorithms. In section \ref{sec:variants} we will describe common variants of differential privacy. Finally, we will be exploring one particular algorithm for differentially private histogram estimation in the local setting \cite{microsoft_telemetry}, and evaluate its performance in low-population scenarios.
+Historically it has been particularly challenging to provide formal guarantees in the ``non-interactive'' setting\footnote{As opposed to the ``interactive'' setting, where the data collector keeps the data set private, but allows users to query the data in some limited way.}, where data sets are published publicly after some form of anonymization. In this setting, the primary defense has been the removal of known identifiers, such as names and birthdates, or other limitation of information from the data set through techniques like sub-sampling. These approaches have seen widespread use, including in particularly sensitive areas like health data, but have repeatedly fallen under re-identification attacks (see e.g. \cite{reidentification2011}).
+
+In recent years, an alternative approach has emerged in the form of \emph{differential privacy}. The culmination of a line of research explored in \cite{precursor_2003,precursor_2004,precusor_2005}, Dwork et al. formalize the concept in \cite{dworketal2006} by introducing their formal description of ``privacy loss''. Differential privacy not only offers a way to describe and compare differentially private algorithms but also guarantees that the privacy provided by such algorithms does not falter in the presence of unforeseen auxiliary information or attack approaches.
+
+Differential privacy has since been subject to considerable interest. It has seen numerous high-profile applications, including the 2020 US census \cite{us_census}, as well as data gathering from companies like Apple \cite{apple_differential,apple_differential_loss}, Google \cite{google_rappor,google_prochlo} and Microsoft \cite{dworketal2006,microsoft_telemetry}. Even beyond its roots in cryptography and statistics, it has also found application in areas like machine learning \cite{ml_abadi,ml_shokri,ml_papernot}. With the growing focus on digital data collection and the privacy concerns that follow, differential privacy has become an important tool for academics and companies alike.
+
+\bigskip
+
+In this thesis, we will be exploring the definition of differential privacy. In section \ref{sec:diffpriv} we will explore its origins and definition. In section \ref{sec:composition} we will show some key theorems of differential privacy that allow us to describe how the privacy provided by algorithms is affected as they are composed. In section \ref{sec:achieving} we will describe some general mechanisms for designing private algorithms. In section \ref{sec:variants} we will describe common variants of differential privacy. Finally, we will be exploring one particular algorithm for differentially private histogram estimation in the local setting \cite{microsoft_telemetry}, and evaluate its performance in low-population scenarios.
 
 \section{Differential privacy \label{sec:diffpriv}}
 
@@ -94,7 +94,7 @@ This leads us to our definition of differential privacy, here formulated as done
     \end{equation}
 \end{mdframed}
 
-For some use cases it may be more useful to state this as the equivalent inequality
+For some use cases it may be more useful to state this as the equivalent
 \begin{equation*}
     \frac{\Pr[\fancy{K}(D_1) \in S]}{\Pr[\fancy{K}(D_2) \in S]} \leq \exp(\epsilon).
 \end{equation*}\bigskip
@@ -283,7 +283,7 @@ The local model for differential privacy \cite{kasiv_localdiff} is an extension 
 
 Formally an algorithm is $\epsilon$-local if it works on a data set $D$ where each entry $x_i \in D$ is computed by an $\epsilon_i$-differentially private algorithm such that $\sum_{i\in\left[|D|\right]} \epsilon_i \leq \epsilon$. From the compositions theorems we showed in section \ref{sec:composition} it is clear that any $\epsilon$-local algorithm is also $\epsilon$-differentially private.
 
-The local model represents a significant shift in the trust model for private algorithms. In the global model, where a data collector collects a data set of private data before perturbing it, each subject must reveal their private data to at least one entity, the data collector. In the local model however, this is no longer necessary. Each user can be absolutely certain that their private data cannot be revealed unless they choose to release it. This is especially important in situations where the data collector cannot be trusted, or has an incentive to violate subject privacy; for this reason it is the local model that has been employed in many of the private telemetry algorithms for use by e.g. Google \cite{google_rappor}, Apple \cite{apple_differential} and Microsoft \cite{microsoft_telemetry}.
+The local model represents a significant shift in the trust model for private algorithms. In the global model, where a data collector collects a data set of private data before perturbing it, each subject must reveal their private data to at least one entity, the data collector. In the local model however, this is no longer necessary. Each subject can be absolutely certain that their private data cannot be revealed unless they choose to release it. This is especially important in situations where the data collector cannot be trusted, or has an incentive to violate subject privacy; for this reason it is the local model that has been employed in many of the private telemetry algorithms for use by e.g. Google \cite{google_rappor}, Apple \cite{apple_differential} and Microsoft \cite{microsoft_telemetry}.
 
 It is worth noting however that the local model is strictly weaker than the global model. In addition to worse lower bounds on the error for the perturbed output, it also isn't every query that can be released under the global model that can be released under the local model \cite[sec.~12.1]{dwork_privacybook}.
 
@@ -304,64 +304,149 @@ It is worth noting that, unlike the $\epsilon$ parameter, the desirable values f
 
 The addition of the $\delta$ parameter allows considerably more freedom in terms of algorithm design. As $(\epsilon,\delta)$-differential privacy is a superset of $\epsilon$-differential privacy, every theorem that we have shown so far also holds for this new definition---but due to the relaxed privacy bounds, new theorems are applicable that are not applicable to our old definition. Of particular note is more advanced composition theorems \cite[Sec.~3.5.2]{dwork_privacybook}, which describe many of the compositions that may happen during real world usage.
 
+\newpage
 \section{Experiments with low-population telemetry collection \label{sec:telemetry}}
 
-\subsection{Introduction}
+In the following section we will be focusing on a 2017 paper \cite{microsoft_telemetry} describing a differentially private algorithm in the local model for mean and histogram estimation.
 
-A 2017 paper building on a local differentially private algorithm for repeatedly collecting metrics from subjects. Historically an issue has been that privacy guarantees quickly degrade over repeated collections, e.g. when collecting telemetry over time.
+The paper builds on previous research \cite{google_rappor} into private algorithms that support repeated collection of the same data from subjects. This is important for common applications of private algorithms like telemetry collection. Historically this has been problematic, as the privacy guarantees degrade quickly as repeated collections are made over time. As a simple example, consider a private algorithm implemented by adding noise to the true value during each collection: as more and more runs are collected, an adversary will become more and more certain of the true value at the center of each of the observed responses.
 
-\subsection{Introduction/Historical context}
+Previous research \cite{google_rappor} proposes using memoization to solve this issue: by remembering the perturbed value given as a response for a given true value, the subject can simply respond with the same perturbed value during the next collection. This ensures that the privacy guarantees made for a single collection hold even when collecting repeatedly---as long as the underlying true value does not change. This approach is weakened when the true value is expected to change frequently, even if the changes are small. Although this can be partially alleviated by discretizing the true values prior to memoization, the problem persists for values near the edges of the discretization buckets.
 
-\subsection{Low population experiments}
+\subsection{The privacy framework \label{sec:framework}}
 
-\begin{description}
-    \item[Experiment setup] We wish to explore the effect of low population size on the utility of the mean and histogram estimation mechanisms described in \cite{microsoft_telemetry}. The paper tests the estimation errors of population sizes varying from $0.3\times10^6$ to $3\times10^6$, but does not test the errors for lower population sizes than this; this leaves many applications---such as telemetry collection by smaller companies than Microsoft---with little information on the applicability of the mechanisms.
-    
-    We test both estimation mechanisms on synthetic data sets sampled from constant, uniform and (truncated) normal distributions, similar to those used in the empirical evaluation in the paper.
-    
-    \item[Mean estimation]
-    
-    \item[Histogram estimation]
-    We aim to measure the \emph{histogram error} of the estimated histograms, defined as $\max_{v\in[k]} |\hat{h}(v)-h(v)|$ where $\hat{h}(v)$ is the estimated frequency of the bucket $v$, and $h(v)$ is the true frequency. This is the error measure used in the paper. In addition to this we also measure the Wasserstein distance between the true and the estimated histograms (with any negative values in the estimated histogram truncated to 0). The histogram error is used to measure the maximum error of any one bucket in the histogram. The Wasserstein distance is used to measure the distance of the entire histogram to the true values.
-    
-    In order for our results to be comparable to those of the original paper, we use similar parameters beyond the population size: we use $k=32$ evenly sized buckets on the range $[0,24]$, permanent memoization for repeated collection, but no output perturbation. We vary population size in the range $[10^3, 3\times10^5]$ and $\epsilon$ in the range $[0.1, 10]$. In order to minimize the impact of the random nature of the mechanisms, we calculate the metrics by averaging over 10 separate estimations.
-    
-    The results can be seen in figure \ref{fig:histogram_errors}. As expected, low population sizes give significantly worse estimation errors: at $n=10^4$ and $\epsilon=1, d=1$ the average estimation error for our normal data set is $0.3$, compared to just $0.045$ when $n=3\times10^5$. In other words, the bucket with the largest misestimation was off by $30\%$ at $n=10^4$. At $n=3\times10^5$ no bucket was misestimated by more than $4.5\%$.
-    
-    Depending on the use case of the estimated histograms, it may be difficult to know the impact of the histogram error on the utility of the histogram. For the purpose of achieving a more intuitive understanding of the estimation error, a visual representation of the histogram estimation for our normal data set can be seen in figure \ref{fig:histogram_matrix}. The Wasserstein distance is a formal measure similar to this intuitive understanding, and reflects many of the same attributes: at low enough $\epsilon$ values the ``utility'' of the histograms does not improve throughout the tested population sizes. Similarly, at high $\epsilon$ values the measure improves only slightly. In between these two the ``utility'' improves from poor to acceptable as we approach the larger population sizes. We expect the measure for all the tested $\epsilon$ values to approach 0 as population size increases further.
-    
-    \begin{figure}
-        \centering
-        \makebox[\textwidth][c]{
-            \subcaptionbox{Normal distribution}
-                {\includegraphics[width=0.6\textwidth]{imgs/histogram_err_normal.png}
-                \includegraphics[width=0.6\textwidth]{imgs/histogram_wassersteins_normal.png}}
-        }
-        \makebox[\textwidth][c]{
-            \subcaptionbox{Uniform distribution}
-                {\includegraphics[width=0.6\textwidth]{imgs/histogram_err_uniform.png}
-                \includegraphics[width=0.6\textwidth]{imgs/histogram_wassersteins_uniform.png}}
-        }
-        \makebox[\textwidth][c]{
-            \subcaptionbox{Constant distribution}
-                {\includegraphics[width=0.6\textwidth]{imgs/histogram_err_constant.png}
-                \includegraphics[width=0.6\textwidth]{imgs/histogram_wassersteins_constant.png}}
-        }
-        \caption{Estimation errors for the histogram estimation mechanism at various $\epsilon$ and population sizes. Solid, dashed and dotted lines are $d=1,2,4$ respectively.}
-        \label{fig:histogram_errors}
-    \end{figure}
-    
-    
-    
-    \begin{figure}
-        \centering
-        \includegraphics[width=\textwidth]{imgs/histogram_matrix.png}
-        \caption{Examples of estimated histograms for various $\epsilon$ and population sizes with $d=1$.}
-        \label{fig:histogram_matrix}
-    \end{figure}
-\end{description}
+The paper \cite{microsoft_telemetry} introduces a three part framework for designing algorithms that offer strong privacy guarantees over repeated collections. The goal of the framework is to allow repeated private collections even in the case where the true value changes between collections. It consists of three steps: first the true value is discretized using an $\alpha$-point rounding scheme, then the discretized value is privatized and memoized. Finally the output is perturbed to mask transitions across discretization buckets.
+
+\subsubsection{$\alpha$-point rounding \label{sec:alpha_rounding}}
+
+The rounding step is an extension of the discretization step from previous approaches. The goal is to mask small changes to the true value by rounding it into ``buckets'', such that values that are close to each other map to the same memoized value. This helps avoid the problem of small changes in the true value leading to large privacy losses, as close values tend to be treated identically.
+
+If implemented naively this may however have a detrimental effect on the accuracy of the algorithm. Since the true value is rounded to a fixed point in its respective bucket, the discretized value may be some distance away from the true value, depending on bucket size. If the true values tend to be correlated across subjects, e.g. if every subject has roughly the same true value, then this rounding may lead to significant inaccuracy in the algorithm as each subject reports values rounded in the same direction.
+
+The idea of $\alpha$-point rounding is to avoid this issue by choosing a rounding direction based on an $\alpha$ value picked independently by each subject. In this way the values after discretization will, when seen across many subjects, roughly center on their true values---even in the case where each subject has the same true value. \bigskip
+
+Formally the $\alpha$-point rounding algorithm is defined as follows:
+
+First, the algorithm designer decides on a bucket size $s$. It is assumed that the true values we wish to discretize are in the range $[0,m]$, and that the algorithm designer picks $s$ such that it divides $m$. This means that we have a total of $m/s$ different values we can memoize to. The paper suggests picking a relatively large $s$ compared to $m$, presumably to protect subject privacy---as $s$ approaches 0, the discretized output approaches the true value, invalidating the rounding step.
+
+As each subject is initialized, before any collection takes place, each subject picks a value $\alpha_i \in [0,s-1]$ uniformly at random. This value remains unchanged throughout the lifetime of the subject.
+
+When collection is requested for a given subject, its true value $x_i$ is mapped to its two neighboring bucket edges $L=s \lfloor x_i / s \rfloor$ and $R=L+s$. The discrete output of the rounding algorithm is then chosen based on the $\alpha_i$ value of the subject: if $x_i + \alpha_i < R$ then the discrete output is $L$. Otherwise it is $R$. \bigskip
+
+Beyond alleviating the accuracy problems of conventional rounding techniques, this approach also helps avoid a class of privacy leaks based on the discretized value.
+
+Consider the example where the true value each subject reports is their age in days. If this value was collected by first discretizing it using a conventional rounding algorithm (where $x_i$ is mapped to some fixed value for its corresponding bucket), and then memoizing the discrete value after privatization, an adversary may still be able to learn the true value given enough collections. Specifically, if the adversary observes a change in reported value from a subject, it knows that said subject has transitioned from one bucket to another. Depending on how the value is privatized it may be able to determine which bucket was transitioned into, and therefore learn the true value of the subject.
+
+This is not possible using $\alpha$-point rounding. Although the adversary may still learn the time at which the reported value transitions from one bucket to the next, this is safe from a privacy perspective as this transition point is defined by $\alpha_i$. Since $\alpha_i$ is picked randomly by each subject, the adversary cannot use it to learn the true value of the subject---only the bucket to which it belongs.
+
+\subsubsection{Privatization and memoization}
+
+After discretization, the value is privatized using some differentially private algorithm. The output of this algorithm is memoized, such that future collections of the same discrete value will give the same output. This is crucial, as explained earlier, in order to avoid degradation of the privacy guarantees under repeated collection. This memoization is permanent, meaning a mapping of discrete value to output exists for the lifetime of the subject once created.
+
+\subsubsection{Output perturbation}
+
+As explained in section \ref{sec:alpha_rounding}, even with $\alpha$-point rounding, an adversary may still learn the point in time at which the subjects reported value transitions from one discretized value to another. The goal of output perturbation is to mask this transition.
+
+Formally, the output perturbation consists of flipping each bit in the memoized output with some small probability $\gamma$ before responding. If $b_i(t)$ is the $i$th bit of given subjects discrete value for a given time $t$, then the perturbed bit $\hat{b}_i(t)$ is defined as $$\hat{b}_i(t)=\begin{cases}
+b_i(t) & \text{with probability 1 } - \gamma, \\
+1 - b_i(t) & \text{otherwise.}
+\end{cases}$$
+
+This random perturbation ensures that an adversary observing the responses for a given subject cannot learn the \emph{exact} point in time at which the discrete value changed. Rather, it can be shown \cite[sec.~4]{microsoft_telemetry} that there is a window in time centered around the true time $t$, during which the adversary cannot differentiate if the change happened at time $t$, or at any other time $t'$ in the window. This window is specifically $[t-d, t+d]$, where $d$ is the Hamming distance between the two memoized values.
+
+\subsection{Histogram estimation}
+
+The paper introduces two $\epsilon$-differentially private algorithms in the local setting, one for mean estimation, and one for histogram estimation. As the experiments in section \ref{sec:experiments} will focus on the histogram estimation algorithm, we will not explore the mean estimation algorithm. Instead, the following section will explain the basics of the histogram estimation algorithm. \bigskip
+
+Histogram estimation is the problem of collecting from each subject the bucket into which their true value falls, and estimating the histogram across the total population of subjects.
+
+In the algorithm described in \cite{microsoft_telemetry}, called $d\textsc{BitFlip}$, the histogram is defined as $k$ buckets. The goal of the algorithm is to estimate how many subjects fall into each of the $k$ bucket, given their differentially private responses.
+
+At initialization time, before any collection takes place, each subject draws $d$ bucket numbers without replacement from $[k]$, denoted $j_1,j_2,\dots,j_d$. These bucket numbers are stored permanently, and re-used for each collection.
+
+During collection, each user first maps their true value $x_i(t)$ to its discrete bucket number $v_i(t)$. They then respond with a vector $$b_i(t)=\left[ (j_1, b_{i,j_1}(t)), (j_2, b_{i,j_2}(t)), \dots, (j_d, b_{i,j_d}(t)) \right]$$
+consisting of their chosen bucket numbers, each with an accompanying random bit $b_{i,j_p}(t)$. This random bit has probability
+$$\Pr[b_{i,j_p}(t)=1]=\begin{cases}
+    \frac{\exp(\epsilon/2)}{\exp(\epsilon / 2) + 1} & \text{if } v_i(t) = j_p, \\
+    \frac{1}{\exp(\epsilon/2) + 1} & \text{otherwise.}
+\end{cases}$$
+
+Given a set of $n$ such response vectors, the data collector is able to estimate the histogram $h_t$ for each bucket number $v \in [k]$ using the formula
+\begin{equation*}
+    \hat{h}_t(v) = \frac{k}{nd} \sum_{\text{received } b_{i,v}(t)} \frac{b_{i,v}(t)\cdot (\exp(\epsilon/2) + 1) - 1}{\exp(\epsilon/2) - 1}.
+\end{equation*}
+The accuracy of the estimated value for each bucket depends on the values of $k$, $\epsilon$, $n$ and $d$ as shown in \cite[sec.~2.2]{microsoft_telemetry}. Specifically, with probability at least $1 - \delta$ we have
+$$
+\max_{v \in [k]} |h_t(v) - \hat{h}_t(v)| \leq O\left( \sqrt{\frac{k \log(k/\delta)}{\epsilon^2nd}} \right).
+$$ \bigskip
+
+This histogram estimation algorithm can be extended using the framework described in section \ref{sec:framework}. This extension of $d\textsc{BitFlip}$, called $d\textsc{BitFlipPM}$, is the algorithm we will use for experimentation in section \ref{sec:experiments}.
+
+\subsection{Low population experiments \label{sec:experiments}}
+
+The algorithms have been subject to empirical evaluation \cite[sec.~5]{microsoft_telemetry}, testing their estimation error at various $d$ and $\epsilon$ parameters, but this has only been done for population sizes of at least $0.3\times 10^6$. This leaves many applications---such as telemetry collection by companies smaller than Microsoft---with little information on the applicability of the mechanisms.
+
+In this section we will extend the experiments for the histogram estimation algorithm to lower population sizes. We expect, due to the nature of differential privacy, that the estimation errors will increase significantly as population size decreases, especially at lower $\epsilon$ parameters. Nonetheless, the exact nature of this relationship is worth exploring. \bigskip
+
+Our implementation of the algorithms, along with the code for these experiments, can be found at \cite{git_repo}.
+
+Similar to the original experiments, we will be using three synthetic data sets sampled from constant, uniform and (truncated) normal distributions, respectively. The exact distributions are identical to those from \cite{microsoft_telemetry}, although the data sets may naturally vary. In order to keep our results comparable, we use the similar parameters to those in \cite{microsoft_telemetry}, beyond population size: we use $k=32$ evenly sized buckets on the range $[0,24]$, and permanent memoization for repeated collection but no output perturbation. We vary population size in the range $[10^3, 0.3 \times 10^6]$, and $\epsilon$ in the range $[0.1, 10]$.
+
+For each data set we measure the \emph{histogram error}, defined as the maximum error across all buckets of the histogram:
+\begin{equation*}
+    \text{Error}\left(h(\cdot), \hat{h}(\cdot)\right) = \max_{v\in [k]} |h(v) - \hat{h}(v)|
+\end{equation*}
+
+Although this measure is useful for finding the estimation error for individual buckets, it does not accurately measure the estimation accuracy of the distribution itself. For this purpose we will instead use a measure known as the Wasserstein distance. Intuitively this measures the amount of ``work'' required to transform one distribution into another, where work is defined as the amount of distribution weight that must be moved, multiplied by the distance it must be moved (this distance measure is also known as the earth mover's distance). Formally it can be calculated using the CDFs $U$ and $V$ of the two distributions to be compared, and is defined as
+\begin{equation*}
+    \text{Wasserstein}(U,V) = \int_{-\infty}^\infty |U-V|.
+\end{equation*}
+
+In order to minimize the impact of the random nature of the algorithm, we calculate the metrics by averaging over 10 separate executions. \bigskip
+
+For the sake of gaining an intuitive understanding of the problem, a visual representation of the histogram estimation for our normal data set can be seen in figure \ref{fig:histogram_matrix}. This supports our expectation that low population sizes cause worse histogram estimations, especially at low $\epsilon$ parameters.
+
+Notably it appears that at low enough $\epsilon$ parameters, the histogram estimation does not significantly improve before we reach the highest population size $n=0.3 \times 10^6$ of our experiments.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{imgs/histogram_matrix.png}
+    \caption{Examples of estimated histograms for various $\epsilon$ and population sizes with $d=1$.}
+    \label{fig:histogram_matrix}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \makebox[\textwidth][c]{
+        \subcaptionbox{Normal distribution}
+            {\includegraphics[width=0.6\textwidth]{imgs/histogram_err_normal.png}
+            \includegraphics[width=0.6\textwidth]{imgs/histogram_wassersteins_normal.png}}
+    }
+    \makebox[\textwidth][c]{
+        \subcaptionbox{Uniform distribution}
+            {\includegraphics[width=0.6\textwidth]{imgs/histogram_err_uniform.png}
+            \includegraphics[width=0.6\textwidth]{imgs/histogram_wassersteins_uniform.png}}
+    }
+    \makebox[\textwidth][c]{
+        \subcaptionbox{Constant distribution}
+            {\includegraphics[width=0.6\textwidth]{imgs/histogram_err_constant.png}
+            \includegraphics[width=0.6\textwidth]{imgs/histogram_wassersteins_constant.png}}
+    }
+    \caption{Estimation errors for the histogram estimation mechanism at various $\epsilon$ and population sizes. Solid, dashed and dotted lines are $d=1,2,4$ respectively.}
+    \label{fig:histogram_errors}
+\end{figure}
 
 \subsubsection{Results}
+
+The results of our experiments can be seen in figure \ref{fig:histogram_errors}. As expected, low population sizes give significantly worse estimation errors: at $n=10^4$ and $\epsilon=1,d=1$ the average estimation error for our normal data set is 0.3, compared to just 0.045 when $n=3\times10^5$. In other words, the bucket with the largest misestimation was off by 30\% at $n=10^4$. At $n=3\times 10^5$ no bucket was misestimated by more than 4.5\%. The histogram error appears to be exponentially correlated to population size. These results agree with those found in \cite{microsoft_telemetry}.
+
+The Wasserstein distance further supports these results. Unlike the histogram error, the Wasserstein distance supports the intuitive understanding of the distribution estimations gained from figure \ref{fig:histogram_matrix}. Specifically, the distribution estimation does not appear to improve notably for $\epsilon=0.1$ until population sizes beyond our scope. For each of the other $\epsilon$ parameters the estimation improves as population size increases. We expect that even $\epsilon=0.1$ will slowly improve as population sizes increase beyond those tested here. \bigskip
+
+These results are promising even for relatively small population sizes. Depending on whether the utility of the histogram estimation for a particular use case lies in distribution estimation or individual bucket estimation, the specific error measure varies.
+
+For the histogram error, measuring individual bucket estimation error, the error quickly decreases as population size goes up. This effect is particularly pronounced for low $\epsilon$ parameters, where the relative decrease as population size increases is greatest.
+
+For the Wasserstein distance, measuring distribution estimation error, the error also decreases as population size goes up. This effect is particularly pronounced for medium $\epsilon$ parameters; for low $\epsilon$ parameters the measure does not significantly increase during the tested population sizes, and for high $\epsilon$ parameters the measure is low even for low population sizes. This leaves the in-between $\epsilon$ parameters for which the measure improves as expected, decreasing as population size and $\epsilon$ increases.
 
 \section{Conclusions}
 
@@ -372,6 +457,8 @@ In chapter \ref{sec:telemetry} we have further explored one specific differentia
 \bigskip
 
 Future work may further explore differentially private algorithms; this is a rapidly evolving field, with ample opportunity for further research or literature review. In particular, the application of the memoization techniques from \cite{microsoft_telemetry} on other algorithms in order to extend their privacy guarantees to temporally repeated collection could be an area of interest, as this is a feature often used in telemetry collection.
+
+\newpage
 
 \printbibliography
 
