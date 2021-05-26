@@ -17,10 +17,10 @@
 
 \renewcommand{\abstractname}{Abstract}
 \begin{abstract}
-\todo{Todo}
-\end{abstract}
+In 2006 Dwork et al. introduced the concept of differential privacy. This formal measure for the privacy provided by algorithms has since been the subject of significant research across multiple fields of academia.
 
-\begin{center} \bf Keywords \end{center}
+In this thesis we will explore this definition and the privacy guarantees it offers. We will explore how algorithms can be designed to fulfill this notion of privacy. Finally we will focus on a private algorithm for histogram estimation introduced in 2017 by Ding et al. We will extend their experimentation on the algorithm into low population scenarios, and evaluate the impact this has on its estimation accuracy. We find that the results align with those found by Ding et al.
+\end{abstract}
 
 \thispagestyle{empty}
 \tableofcontents
@@ -42,7 +42,9 @@ Differential privacy has since been subject to considerable interest. It has see
 
 \bigskip
 
-In this thesis, we will be exploring the definition of differential privacy. In section \ref{sec:diffpriv} we will explore its origins and definition. In section \ref{sec:composition} we will show some key theorems of differential privacy that allow us to describe how the privacy provided by algorithms is affected as they are composed. In section \ref{sec:achieving} we will describe some general mechanisms for designing private algorithms. In section \ref{sec:variants} we will describe common variants of differential privacy. Finally, we will be exploring one particular algorithm for differentially private histogram estimation in the local setting \cite{microsoft_telemetry}, and evaluate its performance in low-population scenarios.
+In this thesis, we will be exploring the definition of differential privacy. In section \ref{sec:diffpriv} we will explore its origins and definition. In section \ref{sec:composition} we will show some key theorems of differential privacy that allow us to describe how the privacy provided by algorithms is affected as they are composed. In section \ref{sec:achieving} we will describe some general mechanisms for designing private algorithms. In section \ref{sec:variants} we will describe common variants of differential privacy.
+
+In section \ref{sec:telemetry} we will be one particular paper \cite{microsoft_telemetry} describing a framework for $\epsilon$-differentially private algorithms in the local model that support repeated collection over time. In section \ref{sec:histogram_algo} we will be describing an algorithm from the same paper for private histogram estimation in the local model. In section \ref{sec:experiments} we will be extending experiments of this algorithm down into low population scenarios, and evaluate its estimation errors.
 
 \section{Differential privacy \label{sec:diffpriv}}
 
@@ -133,7 +135,7 @@ Let us imagine an $\epsilon$-differentially private algorithm $\fancy{K} : \fanc
     &\leq \\
     \exp(\epsilon)\cdot\Pr[\fancy{K}(D_2) \in T] &= \exp(\epsilon)\cdot\Pr[f(\fancy{K}(D_2)) \in S],
 \end{align*}
-where the inequality follows from definition \ref{eq:diffpriv}. This shows that $f \circ \fancy{K}$ is also $\epsilon$-differentially private, if $f$ is deterministic. It can be extended to non-deterministic functions \todo{as these can be decomposed into a convex combination of deterministic functions, and convex combinations preserve differential privacy}.
+where the inequality follows from definition \ref{eq:diffpriv}. This shows that $f \circ \fancy{K}$ is also $\epsilon$-differentially private, if $f$ is deterministic. It can be extended to non-deterministic functions: since this can be considered as a convex combination of deterministic functions, each of which we have shown to preserve $\epsilon$-differential privacy, this combination also preserves $\epsilon$-differential privacy \cite[sec.~2.3]{dwork_privacybook}.
 
 It is important to note that this proof fails if $f$ has knowledge of the original data set. In this case the equalities do not hold, meaning the result is not necessarily $\epsilon$-differentially private. The immunity to post-processing therefore only holds when the input to $\fancy{K}$ is kept private. \bigskip
 
@@ -354,7 +356,7 @@ b_i(t) & \text{with probability 1 } - \gamma, \\
 
 This random perturbation ensures that an adversary observing the responses for a given subject cannot learn the \emph{exact} point in time at which the discrete value changed. Rather, it can be shown \cite[sec.~4]{microsoft_telemetry} that there is a window in time centered around the true time $t$, during which the adversary cannot differentiate if the change happened at time $t$, or at any other time $t'$ in the window. This window is specifically $[t-d, t+d]$, where $d$ is the Hamming distance between the two memoized values.
 
-\subsection{Histogram estimation}
+\subsection{Histogram estimation \label{sec:histogram_algo}}
 
 The paper introduces two $\epsilon$-differentially private algorithms in the local setting, one for mean estimation, and one for histogram estimation. As the experiments in section \ref{sec:experiments} will focus on the histogram estimation algorithm, we will not explore the mean estimation algorithm. Instead, the following section will explain the basics of the histogram estimation algorithm. \bigskip
 
