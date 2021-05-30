@@ -437,9 +437,11 @@ This supports our expectation that low population sizes cause worse histogram es
 
 \subsubsection{Results}
 
-The results of our experiments can be seen in figure \ref{fig:histogram_errors}. As expected, low population sizes give significantly worse estimation errors: at $n=10^4$ and $\epsilon=1,d=1$ the average estimation error for our normal data set is 0.3, compared to just 0.045 when $n=3\times10^5$. In other words, the bucket with the largest misestimation was off by 30\% at $n=10^4$. At $n=3\times 10^5$ no bucket was misestimated by more than 4.5\%. The histogram error appears to be approximately a power function of the population size. These results agree with those found in \cite{microsoft_telemetry}.
+\enlargethispage{\baselineskip}
 
-The Wasserstein distance further supports these results. Unlike the histogram error, the Wasserstein distance supports the intuitive understanding of the distribution estimations gained from Figure \ref{fig:histogram_matrix}. Specifically, the distribution estimation does not appear to improve notably for $\epsilon=0.1$ until population sizes beyond our scope. For each of the other $\epsilon$ parameters, the estimation improves as population size increases. We expect that even for $\epsilon=0.1$ it will slowly improve as population sizes increase beyond those tested here. 
+The results of our experiments can be seen in figure \ref{fig:histogram_errors}. As expected, low population sizes give significantly worse estimation errors: at $n=10^4$ and $\epsilon=1,d=1$ the average estimation error for our normal data set is 0.3, compared to just 0.045 when $n=3\times10^5$. The histogram error appears to be approximately a power function of the population size. These results agree with those found in \cite{microsoft_telemetry}.
+
+The Wasserstein distance further supports these results. Unlike the histogram error, the Wasserstein distance supports the intuitive understanding of the distribution estimations gained from Figure \ref{fig:histogram_matrix}. Specifically, the distribution estimation does not appear to improve notably for $\epsilon=0.1$ until population sizes beyond our scope. For each of the other $\epsilon$ parameters, the estimation improves as population size increases. We expect that even for $\epsilon=0.1$ it will slowly improve as population sizes increase beyond those~tested. 
 
 These results show reasonable estimation errors even for relatively small population sizes. Depending on whether the utility of the histogram estimation for a particular use case lies in distribution estimation or individual bucket estimation, the specific error measure varies.
 
